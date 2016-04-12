@@ -9,9 +9,9 @@ int main()
     meow = meow *256 +keow;
     meow =0b0100000001000001;
     unsigned short hi =meow >> 13; //hi = first 3 bits
-    unsigned short fuck = meow >>3 &0b0000000000000111;
+    unsigned short thing = meow >>3 &0b0000000000000111;
   
-    cout << (int)fuck;
+    cout << (int)thing;
     
     switch (hi) {
         case 1:{
