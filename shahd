@@ -5,10 +5,11 @@ using namespace std;
 
 int main()
 {
-    unsigned short meow = 0b01011010, keow = 0b00000000;
-    meow = meow *256 +keow;
-    meow =0b0100000001000001;
-    unsigned short hi =meow >> 13; //hi = first 3 bits
+    unsigned char meow = 0b01011010, keow = 0b00000000; //this is as if we have the 2 8 bit chars so mem[PC] and mem[Pc+1]
+    unsigned short meow2 = meow *256 +keow; //this is how we can concatinate them into 16 bits (I tested it and it works) 
+                                            //inside meow2 we have 0101101000000000 which is meowkeow
+     
+    unsigned short hi =meow2 >> 13; //hi = first 3 bits //these two lines are just for me to test things out. They play no actual part in the program
     unsigned short thing = meow >>3 &0b0000000000000111;
   
     cout << (int)thing;
