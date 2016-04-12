@@ -1,0 +1,184 @@
+#include<iostream>
+#include<cmath>
+
+using namespace std;
+
+int main()
+{
+    unsigned short meow = 0b01011010, keow = 0b00000000;
+    meow = meow *256 +keow;
+    meow =0b0100000001000001;
+    unsigned short hi =meow >> 13; //hi = first 3 bits
+    unsigned short fuck = meow >>3 &0b0000000000000111;
+  
+    cout << (int)fuck;
+    
+    switch (hi) {
+        case 1:{
+            int offset = (int)(meow & 0b0000000011111111);
+            int Rd = (int) ((meow >> 8) & 0b0000000000000111);
+            switch ((meow >> 11) & 0b0000000000000011) { //the 2 op code bits
+                case 0:
+                    cout << "MOV " << Rd << ", " << offset;
+                    break;
+                case 1:
+                    cout << "CMP " << Rd << ", " << offset;
+                    break;
+                case 2:
+                    cout << "ADD " << Rd << ", " << offset;
+                    break;
+                case 3:
+                    cout << "SUB " << Rd << ", " << offset;
+                    break;
+            
+            }}
+            break;
+        case 2:
+        
+            switch (meow >> 11 & 0b0000000000000011 ) { //now we have the two bits after the 3 bits that tell us we're in case 2.
+                case 0:
+                    if ((meow >> 10 & 0b0000000000000001)== 0) {
+                                int Rd = (int) meow & 0b0000000000000111;
+                                int Rs = (int) meow >>3 &0b0000000000000111;
+                        switch (meow >> 6 & 0b0000000000001111) {
+                             
+                            case 0:
+                            {
+                                cout << "AND " << Rd << ", " << Rs;
+                            
+                            }
+                                break;
+                            case 1:
+                                cout << "EOR " << Rd << ", " << Rs;
+                                break;
+                            case 2:
+                                cout << "LSL " << Rd << ", " << Rs;
+                                break;
+                            case 3:
+                                cout << "LSR " << Rd << ", " << Rs;
+                                break;
+                            case 4:
+                                cout << "ASR " << Rd << ", " << Rs;
+                                break;
+                            case 5:
+                                cout << "ADC " << Rd << ", " << Rs;
+                                break;
+                            case 6:
+                                cout << "SBC " << Rd << ", " << Rs;
+                                break;
+                            case 7:
+                                cout << "ROR " << Rd << ", " << Rs;
+                                break;
+                            case 8:
+                                cout << "TST " << Rd << ", " << Rs;
+                                break;
+                            case 9:
+                                cout << "NEG " << Rd << ", " << Rs;
+                                break;
+                            case 10:
+                                cout << "CMP " << Rd << ", " << Rs;
+                                break;
+                            case 11:
+                                cout << "CMN " << Rd << ", " << Rs;
+                                break;
+                            case 12:
+                                cout << "ORR " << Rd << ", " << Rs;
+                                break;
+                            case 13:
+                                cout << "MUL " << Rd << ", " << Rs;
+                                break;
+                            case 14:
+                                cout << "BIC " << Rd << ", " << Rs;
+                                break;
+                            case 15:
+                                cout << "MVN " << Rd << ", " << Rs;
+                                break;
+                           
+                        }
+                    }
+                    else
+                    {
+                        
+                        cout<<"format 5";
+                        switch (meow >> 6 & 0b0000000000001111) {
+                            case 0:
+                                cout << "undefined";
+                                break;
+                                
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                    
+                case 1:
+                {cout<<"format 6";}
+                
+                    break;
+                default:
+                    if ((meow >> 9 & 0b0000000000000001) == 0) {
+                        cout<< "we're in fromat 7";
+                    }
+                    else
+                    {
+                        cout<<"format 8";
+                    }
+               
+                    break;
+            }
+        break;
+        
+        
+        
+        
+    
+            
+            
+        case 3:{ //format 9 need switch on BL
+            int imm, Rd, Rb;
+            imm = (int) meow >> 6 &0b0000000000011111;
+            int imm_b_zero= imm << 2;
+            Rd = meow & 0b0000000000000111;
+            Rb = meow >> 3 & 0b0000000000000111;
+            switch (meow >> 11 & 0b0000000000000011){ //Switching on BL
+                case 0:
+                    cout << "STR " << Rd << ", [" << Rb << ", " << imm_b_zero << "]";
+                    break;
+                case 1:
+                    cout << "LDR " << Rd << ", [" << Rb << ", " << imm_b_zero << "]";
+                    break;
+                case 2:
+                    cout << "STRB " << Rd << ", [" << Rb << ", " << imm << "]";
+                    break;
+                case 3:
+                    cout << "LDRB " << Rd << ", [" << Rb << ", " << imm << "]";
+                    break;
+            
+            }
+            break;
+            
+        }
+            
+    }
+            
+    
+    
+//    
+//case 4:
+//    //
+//    break;
+//    
+//case 5:
+//    //
+//    break;
+//case 7:
+//    break;
+//case 8:
+//    break;
+//    
+//case 9:
+//    break;
+//            
+//    }
+    return 0;
+}
