@@ -2,137 +2,336 @@
 #include<cmath>
 
 using namespace std;
-
+void simulate (unsigned short);
+int Regs[16] ;char C, V, Z;
+unsigned char Memory[1024];
 int main()
 {
-    unsigned char meow = 0b01011010, keow = 0b00000000; //this is as if we have the 2 8 bit chars so mem[PC] and mem[Pc+1]
-    unsigned short meow2 = meow *256 +keow; //this is how we can concatinate them into 16 bits (I tested it and it works) 
-                                            //inside meow2 we have 0101101000000000 which is meowkeow
-     
-    unsigned short hi =meow2 >> 13; //hi = first 3 bits //these two lines are just for me to test things out. They play no actual part in the program
-    unsigned short thing = meow >>3 &0b0000000000000111;
-  
-    cout << (int)thing;
     
+    
+    FILE *fp;
+    unsigned short inst_word;
+    
+    fp = fopen("put the extension here for the bin file","rb");
+    
+    if(NULL==fp) {
+        printf("Cannot open the file\n");
+        exit(0);
+    }
+    
+    while(fread(&inst_word, 2,1, fp))
+    {
+        //printf("%08x\t%04x\t", Regs[15], inst_word);
+        simulate(inst_word);
+        Regs[15] += 2;
+    }
+    fclose(fp);
+    cout << Regs[0];
+
+    return 0;
+}
+    void simulate (unsigned short meow)
+    {
+    unsigned short hi = meow >> 13;
     switch (hi) {
-        case 1:{
+        case 1:{ //format 3
             int offset = (int)(meow & 0b0000000011111111);
             int Rd = (int) ((meow >> 8) & 0b0000000000000111);
             switch ((meow >> 11) & 0b0000000000000011) { //the 2 op code bits
                 case 0:
-                    cout << "MOV " << Rd << ", " << offset;
+                {cout << "MOV R" << Rd << ", #" << offset << endl;
+                    Regs[Rd] = offset;
+                    //PC++?
+                
+                }
                     break;
                 case 1:
-                    cout << "CMP " << Rd << ", " << offset;
+                {cout << "CMP R" << Rd << ", #" << offset << endl;
+                    if (Regs[Rd] - offset == 0)
+                        Z ='1';
+                    else
+                        Z = '0';
+                    
+                    //Pc?
+                    
+                }
                     break;
                 case 2:
-                    cout << "ADD " << Rd << ", " << offset;
+                {cout << "ADD R" << Rd << ", #" << offset << endl;
+                    Regs[Rd]+= offset;
+                    //Pc?
+                }
                     break;
                 case 3:
-                    cout << "SUB " << Rd << ", " << offset;
+                {cout << "SUB R" << Rd << ", #" << offset << endl;
+                
+                    Regs[Rd] -=offset;
+                    //PC?
+                }
                     break;
-            
+                    
             }}
             break;
         case 2:
-        
+            
             switch (meow >> 11 & 0b0000000000000011 ) { //now we have the two bits after the 3 bits that tell us we're in case 2.
                 case 0:
-                    if ((meow >> 10 & 0b0000000000000001)== 0) {
-                                int Rd = (int) meow & 0b0000000000000111;
-                                int Rs = (int) meow >>3 &0b0000000000000111;
+                    if ((meow >> 10 & 0b0000000000000001)== 0) { //format 4
+                        int Rd = (int) meow & 0b0000000000000111;
+                        int Rs = (int) meow >>3 &0b0000000000000111;
                         switch (meow >> 6 & 0b0000000000001111) {
-                             
+                                
                             case 0:
                             {
-                                cout << "AND " << Rd << ", " << Rs;
-                            
+                                cout << "AND R" << Rd << ", R" << Rs << endl;
+                                Regs[Rd] &= Regs[Rs];
+                                //PC?
+                                
                             }
                                 break;
                             case 1:
-                                cout << "EOR " << Rd << ", " << Rs;
+                            { cout << "EOR R" << Rd << ", R" << Rs << endl;
+                                Regs[Rd] ^=Regs[Rs];
+                                //Pc?
+                            }
                                 break;
                             case 2:
-                                cout << "LSL " << Rd << ", " << Rs;
+                            {cout << "LSL R" << Rd << ", R" << Rs<< endl;
+                                Regs[Rd] <<=Regs[Rs];
+                                //Pc?
+                            
+                            }
                                 break;
                             case 3:
-                                cout << "LSR " << Rd << ", " << Rs;
+                            {cout << "LSR R" << Rd << ", R" << Rs<< endl;
+                                Regs[Rd] >>= Regs[Rs];
+                                //PC?
+                            }
                                 break;
                             case 4:
-                                cout << "ASR " << Rd << ", " << Rs;
+                            {cout << "ASR R" << Rd << ", R" << Rs<< endl;
+                            
+                            //how am I supposed ot do an arithmatic shift?
+                            }
                                 break;
                             case 5:
-                                cout << "ADC " << Rd << ", " << Rs;
+                            {cout << "ADC R" << Rd << ", R" << Rs<< endl;
+                            //how am I supposed to get the carry bit?
+                            }
                                 break;
                             case 6:
-                                cout << "SBC " << Rd << ", " << Rs;
+                            { cout << "SBC R" << Rd << ", R" << Rs<< endl;
+                            //same, how am I supposed to get the carry bit?
+                            }
                                 break;
                             case 7:
-                                cout << "ROR " << Rd << ", " << Rs;
+                            {  cout << "ROR R" << Rd << ", R" << Rs<< endl;
+                            //how should i rotate?
+                            }
                                 break;
                             case 8:
-                                cout << "TST " << Rd << ", " << Rs;
+                            {cout << "TST R" << Rd << ", R" << Rs<< endl;
+                            //shoud i really update the condition flags?
+                            
+                            }
                                 break;
                             case 9:
-                                cout << "NEG " << Rd << ", " << Rs;
+                            {cout << "NEG R" << Rd << ", R" << Rs<< endl;
+                            
+                                Regs[Rd] = -1 * Regs[Rs];
+                                //Pc?
+                            
+                            }
                                 break;
                             case 10:
-                                cout << "CMP " << Rd << ", " << Rs;
+                            {cout << "CMP R" << Rd << ", R" << Rs<< endl;
+                            //should i cmp? Rd-Rs?
+                            }
                                 break;
                             case 11:
-                                cout << "CMN " << Rd << ", " << Rs;
+                            { cout << "CMN R" << Rd << ", R" << Rs<< endl;
+                            //cmp Rs-Rd?
+                            }
                                 break;
                             case 12:
-                                cout << "ORR " << Rd << ", " << Rs;
+                            {cout << "ORR R" << Rd << ", R" << Rs<< endl;
+                                Regs[Rd] |= Regs[Rs];
+                                //Pc
+                            }
                                 break;
                             case 13:
-                                cout << "MUL " << Rd << ", " << Rs;
+                            {cout << "MUL R" << Rd << ", R" << Rs<< endl;
+                                Regs[Rd] *= Regs[Rs];
+                                //PC
+                            }
                                 break;
                             case 14:
-                                cout << "BIC " << Rd << ", " << Rs;
+                            {cout << "BIC R" << Rd << ", R" << Rs<< endl;
+                                Regs[Rd] = Regs[Rd] & (~Regs[Rs]);
+                                //Pc?
+                            }
                                 break;
                             case 15:
-                                cout << "MVN " << Rd << ", " << Rs;
+                            {cout << "MVN R" << Rd << ", R" << Rs<< endl;
+                                Regs[Rd] = ~Regs[Rs];
+                            }
                                 break;
-                           
+                                
                         }
                     }
                     else
-                    {
+                    {   //format 5
+                        int Rd,Hd, Rs, Hs;
+                        Rd  = (int) meow & 0b0000000000000111;
+                        Hd = Rd + 8;
+                        Rs = (int) meow >> 3 &0b0000000000000111;
+                        Hs = Rs +8;
                         
-                        cout<<"format 5";
                         switch (meow >> 6 & 0b0000000000001111) {
-                            case 0:
+                           
+                            
+                            case 1:
+                            {cout << "ADD R" << Rd << ", R" << Hs << endl;
+                            
+                                Regs[Rd] += Regs[Hs];
+                            
+                            } break; //rd, hs
+                            case 2:
+                            {cout << "ADD R" << Hd << ", R" << Rs <<endl;
+                            
+                                Regs[Hd] += Regs[Rs];
+                            } break; //hd, rs
+                            case 3:
+                            {cout << "Add R" << Hd <<", R" << Hs << endl;
+                                Regs[Hd] += Regs[Hs];
+                            
+                            }break; //Hd, Hs
+                            case 5://says i shouldln't update for format 5
+                                cout << "CMP R" << Rd << ", R" << Hs << endl; //Rd, Hs
+                            case 6:
+                                cout << "CMP R" << Hd << ", R" << Rs << endl;// CMP Hd, Rs
+                                break;
+                            case 7:
+                                cout << "CMP R" << Hd << ", R" << Hs << endl;//CMP Hd, Hs
+                                break;
+                            case 9:
+                            {cout << "MOV R" << Rd << ", R" << Hs << endl;
+                                Regs[Rd] = Regs[Hs];
+                            
+                            }//MOV Rd, Hs
+                                break;
+                            case 10:
+                            {cout << "MOV R" << Hd << ", R" << Rs << endl;
+                                Regs[Hd] = Regs[Rs];
+                                
+                            }//Mod Hd, Rs
+                                break;
+                            case 11:
+                            {cout << "MOV R" << Hd << ", R" << Hs << endl;
+                                Regs[Hd] = Regs[Hs];
+                            }//Mod Hd, Hs
+                                break;
+                            case 12:
+                            {cout << "BX R"<< Rs <<endl;
+                                Regs[15] = Regs[Rs];
+                            }
+                                break;
+                            case 13:
+                            { cout << "Bx R" << Hs << endl;
+                            if (Hs == 15)
+                                if (Regs[15] % 4 !=0) {
+                                    cout << "you are branching to the PC, from a non word aligned address, therefore the execution will be unpredictable" << endl;
+                                    Regs[15]= (Regs[15] & 0b01111111111111111111111111111111) + 4;
+                                }
+                                else Regs[15]= (Regs[15] & 0b01111111111111111111111111111111) + 4;
+                            
+                            }
+                                break;
+                            default:
                                 cout << "undefined";
                                 break;
-                                
-                            default:
                                 break;
+                                
                         }
                     }
                     break;
                     
-                case 1:
-                {cout<<"format 6";}
+                case 1: //format 6
+                {
+                    int imm = meow & 0b0000000011111111;
+                    imm = imm<<2;
+                    int Rd = (int) meow >> 8 & 0b0000000000000111;
+                    
+                    cout << "LDR R" << Rd << ", [PC, #" << imm << "]" << endl;
+                    Regs[Rd] = Memory[imm+Regs[15]];
                 
+                }
+                    
                     break;
                 default:
-                    if ((meow >> 9 & 0b0000000000000001) == 0) {
-                        cout<< "we're in fromat 7";
+                    if ((meow >> 9 & 0b0000000000000001) == 0) { // format 7
+                        int Rd, Ro, Rb;
+                        Rd = meow & 0b0000000000000111;
+                        Rb = meow >> 3 &0b0000000000000111;
+                        Ro = meow >> 6 &0b0000000000000111;
+                        switch (meow >> 10 & 0b0000000000000011) {
+                            case 0:
+                            {cout << "STR R" << Rd << ", [R" << Rb << ", R" << Ro << "]" << endl;
+                                Memory[Regs[Rb] + Regs[Ro]] = Regs[Rd];
+                            }
+                                break;
+                            case 1:
+                            {cout << "STRB R" << Rd << ", [R" << Rb << ", R" << Ro << "]" << endl;
+                                Memory[Regs[Rb] + Regs[Ro]] = Regs[Rd];
+                            
+                            }
+                                break;
+                            case 2:
+                            {cout << "LDR R" << Rd << ", [R" << Rb << ", R" << Ro << "]" << endl;
+                                Regs[Rd] = Memory[Regs[Rb] + Regs[Ro]];
+                            
+                            }
+                                break;
+                            case 3:
+                            {cout << "LDRB R" << Rd << ", [R" << Rb << ", R" << Ro << "]" << endl;
+                            Regs[Rd] = Memory[Regs[Rb] + Regs[Ro]];
+                            }
+                                break;
+                                
+                        }
                     }
-                    else
+                    else //format 8
                     {
-                        cout<<"format 8";
+                        int Rd, Ro, Rb;
+                        Rd = meow & 0b0000000000000111;
+                        Rb = meow >> 3 &0b0000000000000111;
+                        Ro = meow >> 6 &0b0000000000000111;
+                        switch (meow >> 10 & 0b0000000000000011) {
+                            case 0:
+                                cout << "STRH R" << Rd << ", [R" << Rb << ", R" << Ro << "]" << endl;
+                                break;
+                            case 1:
+                                cout << "LDSB R" << Rd << ", [R" << Rb << ", R" << Ro << "]" << endl;
+                                break;
+                            case 2:
+                                cout << "LDRH R" << Rd << ", [R" << Rb << ", R" << Ro << "]" << endl;
+                                break;
+                            case 3:
+                                cout << "LDSH R" << Rd << ", [R" << Rb << ", R" << Ro << "]" << endl;
+                                break;
+                                
+                        }
+
                     }
-               
+                    
                     break;
             }
-        break;
-        
-        
-        
-        
-    
+            break;
+            
+            
+            
+            
+            
             
             
         case 3:{ //format 9 need switch on BL
@@ -143,43 +342,42 @@ int main()
             Rb = meow >> 3 & 0b0000000000000111;
             switch (meow >> 11 & 0b0000000000000011){ //Switching on BL
                 case 0:
-                    cout << "STR " << Rd << ", [" << Rb << ", " << imm_b_zero << "]";
+                    cout << "STR R" << Rd << ", [R" << Rb << ", #" << imm_b_zero << "]"<< endl;
                     break;
                 case 1:
-                    cout << "LDR " << Rd << ", [" << Rb << ", " << imm_b_zero << "]";
+                    cout << "LDR R" << Rd << ", [R" << Rb << ", #" << imm_b_zero << "]"<< endl;
                     break;
                 case 2:
-                    cout << "STRB " << Rd << ", [" << Rb << ", " << imm << "]";
+                    cout << "STRB R" << Rd << ", [R" << Rb << ", #" << imm << "]"<< endl;
                     break;
                 case 3:
-                    cout << "LDRB " << Rd << ", [" << Rb << ", " << imm << "]";
+                    cout << "LDRB R" << Rd << ", [R" << Rb << ", #" << imm << "]"<< endl;
                     break;
-            
+                    
             }
             break;
             
         }
             
     }
-            
     
+    }
     
-//    
-//case 4:
-//    //
-//    break;
-//    
-//case 5:
-//    //
-//    break;
-//case 7:
-//    break;
-//case 8:
-//    break;
-//    
-//case 9:
-//    break;
-//            
-//    }
-    return 0;
-}
+    //
+    //case 4:
+    //    //
+    //    break;
+    //
+    //case 5:
+    //    //
+    //    break;
+    //case 7:
+    //    break;
+    //case 8:
+    //    break;
+    //
+    //case 9:
+    //    break;
+    //            
+    //    }
+ 
