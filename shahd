@@ -26,21 +26,29 @@ int main()
     FILE *fp;
     unsigned short inst_word;
     
-    fp = fopen("/Users/shahdsherif/Downloads/Archive(1)/sum.f.s.bin","rb");
+    fp = fopen("/Users/shahdsherif/Downloads/Archive(1)/test2.s.bin","rb");
     
     if(NULL==fp) {
         printf("Cannot open the file\n");
         exit(0);
     }
     
+    
+    fread(&SP, 4,2, fp);
+
+    fread(&PC, 4,2, fp);
+
+    
+   
     while(fread(&inst_word, 2,1, fp))
     {
         //printf("%08x\t%04x\t", Regs[15], inst_word);
         simulate(inst_word);
         Regs[15] += 2;
+        
     }
     fclose(fp);
-    cout << Regs[0];
+    
     
     return 0;
 }
