@@ -26,7 +26,7 @@ int main()
     FILE *fp;
     unsigned short inst_word;
     
-    fp = fopen("/Users/shahdsherif/Downloads/Archive(1)/test2.s.bin","rb");
+    fp = fopen("/Users/shahdsherif/Downloads/Archive(1)/sum.f.s.bin","rb");
     
     if(NULL==fp) {
         printf("Cannot open the file\n");
@@ -35,19 +35,21 @@ int main()
     
     
     fread(&SP, 4,2, fp);
-
-    fread(&PC, 4,2, fp);
-
     
-   
+    fread(&PC, 4,2, fp);
+    
+    
+    
     while(fread(&inst_word, 2,1, fp))
     {
-        //printf("%08x\t%04x\t", Regs[15], inst_word);
+        printf("%08x\t%04x\t", Regs[15], inst_word);
         simulate(inst_word);
         Regs[15] += 2;
         
     }
     fclose(fp);
+    
+    
     
     
     return 0;
@@ -140,7 +142,17 @@ void simulate (unsigned short meow)
                         Z ='1';
                     else
                         Z = '0';
+                    if (Regs[Rd] - offset < 0) {
+                        N = '1';
+                    }
+                    else
+                        N = '0';
                     
+                    if (Regs[Rd] - offset > Regs[Rd] | offset) {
+                        C = '1';
+                    }
+                    else
+                        C = '0';
                     //Pc?
                     
                 }
@@ -201,22 +213,58 @@ void simulate (unsigned short meow)
                             case 4:
                             {cout << "ASR R" << Rd << ", R" << Rs<< endl;
                                 
+                                if (Regs[Rd] >> 32 == 1) {
+                                    Regs[Rd] |=0b11111111111111111111111111111111;
+                                }
+                                else
+                                    Regs[Rd] >>=Regs[Rs];
+                                
                                 //how am I supposed ot do an arithmatic shift?
                             }
                                 break;
                             case 5:
                             {cout << "ADC R" << Rd << ", R" << Rs<< endl;
-                                //how am I supposed to get the carry bit?
+                                
+                                if (Regs[Rd] + Regs[Rs] < Regs[Rd] | Regs[Rs]) {
+                                   
+                                    C = '1';
+                                }
+                                else
+                                    C = '0';
+                                Regs[Rd]+=Regs[Rs];
+                                
+                                
+                                
                             }
                                 break;
                             case 6:
                             { cout << "SBC R" << Rd << ", R" << Rs<< endl;
-                                //same, how am I supposed to get the carry bit?
+                                if (Regs[Rd] - Regs[Rs] > Regs[Rd] | Regs[Rs]) {
+                                    
+                                    C = '1';
+                                }
+                                else
+                                    C = '0';
+                                Regs[Rd]-=Regs[Rs];
+
                             }
                                 break;
                             case 7:
                             {  cout << "ROR R" << Rd << ", R" << Rs<< endl;
-                                //how should i rotate?
+                                int i;
+                                while (i< 16){
+                                if ((Regs[Rd] >> 32) == 1) {
+                                         Regs[Rd] <<= 1;
+                                         Regs[Rd] +=1;
+                                }
+                                         else
+                                         {
+                                         Regs[Rd] <<= 1;
+                                         
+                                    
+                                         }i++;
+                                }
+                                
                             }
                                 break;
                             case 8:
@@ -235,12 +283,44 @@ void simulate (unsigned short meow)
                                 break;
                             case 10:
                             {cout << "CMP R" << Rd << ", R" << Rs<< endl;
-                                //should i cmp? Rd-Rs?
+                                if (Regs[Rd] - Regs[Rs] == 0)
+                                    Z ='1';
+                                else
+                                    Z = '0';
+                                if (Regs[Rd] - Regs[Rs] < 0) {
+                                    N = '1';
+                                }
+                                else
+                                    N = '0';
+                                
+                                if (Regs[Rd] - Regs[Rs] > Regs[Rd] | Regs[Rs]) {
+                                    C = '1';
+                                }
+                                else
+                                    C = '0';
+                                //Pc?
+
                             }
                                 break;
                             case 11:
                             { cout << "CMN R" << Rd << ", R" << Rs<< endl;
-                                //cmp Rs-Rd?
+                                if (Regs[Rs] - Regs[Rd] == 0)
+                                    Z ='1';
+                                else
+                                    Z = '0';
+                                if (Regs[Rs] - Regs[Rd] < 0) {
+                                    N = '1';
+                                }
+                                else
+                                    N = '0';
+                                
+                                if (Regs[Rs] - Regs[Rd] > Regs[Rd] | Regs[Rs]) {
+                                    C = '1';
+                                }
+                                else
+                                    C = '0';
+                                //Pc?
+
                             }
                                 break;
                             case 12:
