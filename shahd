@@ -13,7 +13,7 @@ void simulate (unsigned short);
 char C, V, Z, N;
 
 unsigned char Memory[1024];
-unsigned int Regs[16] ;
+unsigned int Regs[16];
 
 #define PC Regs[15]
 #define LR Regs[14]
@@ -27,6 +27,8 @@ int main()
     unsigned short inst_word;
     
     fp = fopen("/Users/shahdsherif/Downloads/Archive(1)/sum.f.s.bin","rb");
+    
+    
     
     if(NULL==fp) {
         printf("Cannot open the file\n");
@@ -43,10 +45,15 @@ int main()
     while(fread(&inst_word, 2,1, fp))
     {
         printf("%08x\t%04x\t", Regs[15], inst_word);
+        if (Regs[15] == 0x00000008) {
+            
+        }
         simulate(inst_word);
         Regs[15] += 2;
-        
+        cout << endl;
     }
+    
+    
     fclose(fp);
     
     
@@ -70,17 +77,17 @@ void simulate (unsigned short meow)
                 {
                     case 0: // LSL
                         printf("LSL R%d, R%d, #%d", Rd, Rs, offset);
-                        cout << endl;
+                        
                         Regs[Rd] = Regs[Rs] << offset;
                         break;
                     case 1: // LSR
                         printf("LSR R%d, R%d, #%d", Rd, Rs, offset);
-                        cout << endl;
+                        
                         Regs[Rd] = Regs[Rs] >> offset;
                         break;
                     case 2: // ASR
                         printf("ASR R%d, R%d, #%d", Rd, Rs, offset);
-                        cout << endl;
+                        
                         Regs[Rd] = Regs[Rs] / (offset >= 0 ? pow(2, offset) : 1);
                         break;
                 }
@@ -96,13 +103,13 @@ void simulate (unsigned short meow)
                     if (op) // Sub
                     {
                         printf("SUB R%d, R%d, #%d", Rd, Rs, RnOffset);
-                        cout << endl;
+                        
                         Regs[Rd] = Regs[Rs] - RnOffset;
                     }
                     else    // Add
                     {
                         printf("ADD R%d, R%d, #%d", Rd, Rs, RnOffset);
-                        cout << endl;
+                        
                         Regs[Rd] = Regs[Rs] + RnOffset;
                     }
                 }
@@ -111,12 +118,12 @@ void simulate (unsigned short meow)
                     if (op) // Sub
                     {
                         printf("SUB R%d, R%d, R%d", Rd, Rs, RnOffset);
-                        cout << endl;
+                        
                         Regs[Rd] = Regs[Rs] - Regs[RnOffset];
                     }
                     else    // Add
                     {
-                        printf("ADD R%d, R%d, R%d", Rd, Rs, RnOffset);cout << endl;
+                        printf("ADD R%d, R%d, R%d", Rd, Rs, RnOffset);
                         Regs[Rd] = Regs[Rs] + Regs[RnOffset];
                     }
                 }
@@ -130,14 +137,16 @@ void simulate (unsigned short meow)
             int Rd = (int) ((meow >> 8) & 0b0000000000000111);
             switch ((meow >> 11) & 0b0000000000000011) { //the 2 op code bits
                 case 0:
-                {cout << "MOV R" << Rd << ", #" << offset << endl;
+                {cout << "MOV R" << Rd << ", #" << offset ;
                     Regs[Rd] = offset;
+                    
+                    
                     //PC++?
                     
                 }
                     break;
                 case 1:
-                {cout << "CMP R" << Rd << ", #" << offset << endl;
+                {cout << "CMP R" << Rd << ", #" << offset ;
                     if (Regs[Rd] - offset == 0)
                         Z ='1';
                     else
@@ -150,21 +159,22 @@ void simulate (unsigned short meow)
                     
                     if (Regs[Rd] - offset > Regs[Rd] | offset) {
                         C = '1';
+                        V = '1';
                     }
                     else
-                        C = '0';
+                    V = C = '0';
                     //Pc?
                     
                 }
                     break;
                 case 2:
-                {cout << "ADD R" << Rd << ", #" << offset << endl;
+                {cout << "ADD R" << Rd << ", #" << offset ;
                     Regs[Rd]+= offset;
                     //Pc?
                 }
                     break;
                 case 3:
-                {cout << "SUB R" << Rd << ", #" << offset << endl;
+                {cout << "SUB R" << Rd << ", #" << offset ;
                     
                     Regs[Rd] -=offset;
                     //PC?
@@ -185,33 +195,33 @@ void simulate (unsigned short meow)
                                 
                             case 0:
                             {
-                                cout << "AND R" << Rd << ", R" << Rs << endl;
+                                cout << "AND R" << Rd << ", R" << Rs ;
                                 Regs[Rd] &= Regs[Rs];
                                 //PC?
                                 
                             }
                                 break;
                             case 1:
-                            { cout << "EOR R" << Rd << ", R" << Rs << endl;
+                            { cout << "EOR R" << Rd << ", R" << Rs ;
                                 Regs[Rd] ^=Regs[Rs];
                                 //Pc?
                             }
                                 break;
                             case 2:
-                            {cout << "LSL R" << Rd << ", R" << Rs<< endl;
+                            {cout << "LSL R" << Rd << ", R" << Rs;
                                 Regs[Rd] <<=Regs[Rs];
                                 //Pc?
                                 
                             }
                                 break;
                             case 3:
-                            {cout << "LSR R" << Rd << ", R" << Rs<< endl;
+                            {cout << "LSR R" << Rd << ", R" << Rs;
                                 Regs[Rd] >>= Regs[Rs];
                                 //PC?
                             }
                                 break;
                             case 4:
-                            {cout << "ASR R" << Rd << ", R" << Rs<< endl;
+                            {cout << "ASR R" << Rd << ", R" << Rs;
                                 
                                 if (Regs[Rd] >> 32 == 1) {
                                     Regs[Rd] |=0b11111111111111111111111111111111;
@@ -223,10 +233,10 @@ void simulate (unsigned short meow)
                             }
                                 break;
                             case 5:
-                            {cout << "ADC R" << Rd << ", R" << Rs<< endl;
+                            {cout << "ADC R" << Rd << ", R" << Rs;
                                 
                                 if (Regs[Rd] + Regs[Rs] < Regs[Rd] | Regs[Rs]) {
-                                   
+                                    
                                     C = '1';
                                 }
                                 else
@@ -238,7 +248,7 @@ void simulate (unsigned short meow)
                             }
                                 break;
                             case 6:
-                            { cout << "SBC R" << Rd << ", R" << Rs<< endl;
+                            { cout << "SBC R" << Rd << ", R" << Rs;
                                 if (Regs[Rd] - Regs[Rs] > Regs[Rd] | Regs[Rs]) {
                                     
                                     C = '1';
@@ -246,35 +256,50 @@ void simulate (unsigned short meow)
                                 else
                                     C = '0';
                                 Regs[Rd]-=Regs[Rs];
-
+                                
                             }
                                 break;
                             case 7:
-                            {  cout << "ROR R" << Rd << ", R" << Rs<< endl;
+                            {  cout << "ROR R" << Rd << ", R" << Rs;
                                 int i;
                                 while (i< 16){
-                                if ((Regs[Rd] >> 32) == 1) {
-                                         Regs[Rd] <<= 1;
-                                         Regs[Rd] +=1;
-                                }
-                                         else
-                                         {
-                                         Regs[Rd] <<= 1;
-                                         
-                                    
-                                         }i++;
+                                    if ((Regs[Rd] >> 32) == 1) {
+                                        Regs[Rd] <<= 1;
+                                        Regs[Rd] +=1;
+                                    }
+                                    else
+                                    {
+                                        Regs[Rd] <<= 1;
+                                        
+                                        
+                                    }i++;
                                 }
                                 
                             }
                                 break;
                             case 8:
-                            {cout << "TST R" << Rd << ", R" << Rs<< endl;
-                                //shoud i really update the condition flags?
+                            {cout << "TST R" << Rd << ", R" << Rs;
+                                if (Regs[Rd] & Regs[Rs] == 0)
+                                    Z ='1';
+                                else
+                                    Z = '0';
+                                if (Regs[Rd] & Regs[Rs]  < 0) {
+                                    N = '1';
+                                }
+                                else
+                                    N = '0';
+                                
+                                if (Regs[Rd] & Regs[Rs]  > Regs[Rd] | Regs[Rs]) {
+                                    C = '1';
+                                    V = '1';
+                                }
+                                else
+                                    V = C = '0';
                                 
                             }
                                 break;
                             case 9:
-                            {cout << "NEG R" << Rd << ", R" << Rs<< endl;
+                            {cout << "NEG R" << Rd << ", R" << Rs;
                                 
                                 Regs[Rd] = -1 * Regs[Rs];
                                 //Pc?
@@ -282,7 +307,7 @@ void simulate (unsigned short meow)
                             }
                                 break;
                             case 10:
-                            {cout << "CMP R" << Rd << ", R" << Rs<< endl;
+                            {cout << "CMP R" << Rd << ", R" << Rs;
                                 if (Regs[Rd] - Regs[Rs] == 0)
                                     Z ='1';
                                 else
@@ -299,11 +324,11 @@ void simulate (unsigned short meow)
                                 else
                                     C = '0';
                                 //Pc?
-
+                                
                             }
                                 break;
                             case 11:
-                            { cout << "CMN R" << Rd << ", R" << Rs<< endl;
+                            { cout << "CMN R" << Rd << ", R" << Rs;
                                 if (Regs[Rs] - Regs[Rd] == 0)
                                     Z ='1';
                                 else
@@ -320,29 +345,29 @@ void simulate (unsigned short meow)
                                 else
                                     C = '0';
                                 //Pc?
-
+                                
                             }
                                 break;
                             case 12:
-                            {cout << "ORR R" << Rd << ", R" << Rs<< endl;
+                            {cout << "ORR R" << Rd << ", R" << Rs;
                                 Regs[Rd] |= Regs[Rs];
                                 //Pc
                             }
                                 break;
                             case 13:
-                            {cout << "MUL R" << Rd << ", R" << Rs<< endl;
+                            {cout << "MUL R" << Rd << ", R" << Rs;
                                 Regs[Rd] *= Regs[Rs];
                                 //PC
                             }
                                 break;
                             case 14:
-                            {cout << "BIC R" << Rd << ", R" << Rs<< endl;
+                            {cout << "BIC R" << Rd << ", R" << Rs;
                                 Regs[Rd] = Regs[Rd] & (~Regs[Rs]);
                                 //Pc?
                             }
                                 break;
                             case 15:
-                            {cout << "MVN R" << Rd << ", R" << Rs<< endl;
+                            {cout << "MVN R" << Rd << ", R" << Rs;
                                 Regs[Rd] = ~Regs[Rs];
                             }
                                 break;
@@ -361,56 +386,56 @@ void simulate (unsigned short meow)
                                 
                                 
                             case 1:
-                            {cout << "ADD R" << Rd << ", R" << Hs << endl;
+                            {cout << "ADD R" << Rd << ", R" << Hs ;
                                 
                                 Regs[Rd] += Regs[Hs];
                                 
                             } break; //rd, hs
                             case 2:
-                            {cout << "ADD R" << Hd << ", R" << Rs <<endl;
+                            {cout << "ADD R" << Hd << ", R" << Rs ;
                                 
                                 Regs[Hd] += Regs[Rs];
                             } break; //hd, rs
                             case 3:
-                            {cout << "Add R" << Hd <<", R" << Hs << endl;
+                            {cout << "Add R" << Hd <<", R" << Hs ;
                                 Regs[Hd] += Regs[Hs];
                                 
                             }break; //Hd, Hs
                             case 5://says i shouldln't update for format 5
-                                cout << "CMP R" << Rd << ", R" << Hs << endl; //Rd, Hs
+                                cout << "CMP R" << Rd << ", R" << Hs ; //Rd, Hs
                             case 6:
-                                cout << "CMP R" << Hd << ", R" << Rs << endl;// CMP Hd, Rs
+                                cout << "CMP R" << Hd << ", R" << Rs ;// CMP Hd, Rs
                                 break;
                             case 7:
-                                cout << "CMP R" << Hd << ", R" << Hs << endl;//CMP Hd, Hs
+                                cout << "CMP R" << Hd << ", R" << Hs ;//CMP Hd, Hs
                                 break;
                             case 9:
-                            {cout << "MOV R" << Rd << ", R" << Hs << endl;
+                            {cout << "MOV R" << Rd << ", R" << Hs ;
                                 Regs[Rd] = Regs[Hs];
                                 
                             }//MOV Rd, Hs
                                 break;
                             case 10:
-                            {cout << "MOV R" << Hd << ", R" << Rs << endl;
+                            {cout << "MOV R" << Hd << ", R" << Rs ;
                                 Regs[Hd] = Regs[Rs];
                                 
                             }//Mod Hd, Rs
                                 break;
                             case 11:
-                            {cout << "MOV R" << Hd << ", R" << Hs << endl;
+                            {cout << "MOV R" << Hd << ", R" << Hs ;
                                 Regs[Hd] = Regs[Hs];
                             }//Mod Hd, Hs
                                 break;
                             case 12:
-                            {cout << "BX R"<< Rs <<endl;
+                            {cout << "BX R"<< Rs ;
                                 Regs[15] = Regs[Rs];
                             }
                                 break;
                             case 13:
-                            { cout << "Bx R" << Hs << endl;
+                            { cout << "Bx R" << Hs ;
                                 if (Hs == 15)
                                     if (Regs[15] % 4 !=0) {
-                                        cout << "you are branching to the PC, from a non word aligned address, therefore the execution will be unpredictable" << endl;
+                                        cout << "you are branching to the PC, from a non word aligned address, therefore the execution will be unpredictable" ;
                                         Regs[15]= (Regs[15] & 0b01111111111111111111111111111111) + 4;
                                     }
                                     else Regs[15]= (Regs[15] & 0b01111111111111111111111111111111) + 4;
@@ -432,8 +457,9 @@ void simulate (unsigned short meow)
                     imm = imm<<2;
                     int Rd = (int) meow >> 8 & 0b0000000000000111;
                     
-                    cout << "LDR R" << Rd << ", [PC, #" << imm << "]" << endl;
+                    cout << "LDR R" << Rd << ", [PC, #" << imm << "]" ;
                     Regs[Rd] = Memory[imm+Regs[15]];
+                    
                     
                 }
                     
@@ -447,24 +473,31 @@ void simulate (unsigned short meow)
                         Ro = meow >> 6 &0b0000000000000111;
                         switch (meow >> 10 & 0b0000000000000011) {
                             case 0:
-                            {cout << "STR R" << Rd << ", [R" << Rb << ", R" << Ro << "]" << endl;
-                                Memory[Regs[Rb] + Regs[Ro]] = Regs[Rd];
+                            {cout << "STR R" << Rd << ", [R" << Rb << ", R" << Ro << "]" ;
+                                Memory[Regs[Rb] + Regs[Ro]] = Regs[Rd] & 0b1111111100000000;
+                                Memory[Regs[Rb] + Regs[Ro] + 1] = Regs[Rd]<<8 & 0b1111111100000000;
+                                Memory[Regs[Rb] + Regs[Ro] + 2] = Regs[Rd] <<24& 0b1111111100000000;
+                                Memory[Regs[Rb] + Regs[Ro] + 3] = Regs[Rd] & 0b1111111100000000;
+                                
+                                
+                                
+                                //Memory
                             }
                                 break;
                             case 1:
-                            {cout << "STRB R" << Rd << ", [R" << Rb << ", R" << Ro << "]" << endl;
+                            {cout << "STRB R" << Rd << ", [R" << Rb << ", R" << Ro << "]" ;
                                 Memory[Regs[Rb] + Regs[Ro]] = Regs[Rd];
                                 
                             }
                                 break;
                             case 2:
-                            {cout << "LDR R" << Rd << ", [R" << Rb << ", R" << Ro << "]" << endl;
-                                Regs[Rd] = Memory[Regs[Rb] + Regs[Ro]];
+                            {cout << "LDR R" << Rd << ", [R" << Rb << ", R" << Ro << "]" ;
+                                Regs[Rd] = Memory[Regs[Rb] + Regs[Ro]] + Memory[Regs[Rb] + Regs[Ro]+1] +Memory[Regs[Rb] + Regs[Ro]+2]+Memory[Regs[Rb] + Regs[Ro]+3];
                                 
                             }
                                 break;
                             case 3:
-                            {cout << "LDRB R" << Rd << ", [R" << Rb << ", R" << Ro << "]" << endl;
+                            {cout << "LDRB R" << Rd << ", [R" << Rb << ", R" << Ro << "]" ;
                                 Regs[Rd] = Memory[Regs[Rb] + Regs[Ro]];
                             }
                                 break;
@@ -479,16 +512,30 @@ void simulate (unsigned short meow)
                         Ro = meow >> 6 &0b0000000000000111;
                         switch (meow >> 10 & 0b0000000000000011) {
                             case 0:
-                                cout << "STRH R" << Rd << ", [R" << Rb << ", R" << Ro << "]" << endl;
-                                break;
+                            {cout << "STRH R" << Rd << ", [R" << Rb << ", R" << Ro << "]" ;
+                                Memory[Regs[Rb] + Regs[Ro]] = Regs[Rd] & 0b1111111100000000;
+                                Memory[Regs[Rb] + Regs[Ro] + 1] = Regs[Rd]<<8 & 0b1111111100000000;
+                            } break;
                             case 1:
-                                cout << "LDSB R" << Rd << ", [R" << Rb << ", R" << Ro << "]" << endl;
+                            {cout << "LDSB R" << Rd << ", [R" << Rb << ", R" << Ro << "]" ;
+                            
+                                Regs[Rd] |=0b1111000000000000;
+                                Regs[Rd] = Memory[Regs[Rb] + Regs[Ro]];
+                            
+                            }
                                 break;
                             case 2:
-                                cout << "LDRH R" << Rd << ", [R" << Rb << ", R" << Ro << "]" << endl;
+                            { cout << "LDRH R" << Rd << ", [R" << Rb << ", R" << Ro << "]" ;
+                                Regs[Rd] = Memory[Regs[Rb] + Regs[Ro]] + Memory[Regs[Rb] + Regs[Ro]+1];
+                            
+                            }
                                 break;
                             case 3:
-                                cout << "LDSH R" << Rd << ", [R" << Rb << ", R" << Ro << "]" << endl;
+                            { cout << "LDSH R" << Rd << ", [R" << Rb << ", R" << Ro << "]" ;
+                            Regs[Rd] = Memory[Regs[Rb] + Regs[Ro]] + Memory[Regs[Rb] + Regs[Ro]+1];
+                                Regs[Rd] |=0b1111000000000000;
+                            
+                            }
                                 break;
                                 
                         }
@@ -500,7 +547,2027 @@ void simulate (unsigned short meow)
             break;
             
             
+        case 5:
             
+        {
+            
+            //bit12: used as an indicator 1 for me to indicate in which case I am in
+            
+            // to get indicator1: step1: shift meow 12 to the right. step2: anding it with one to get the first bit from the left.
+            
+            int indicator1= (int)((meow>>12)&0b0000000000000001);
+            
+            if (indicator1==0)
+                
+            {
+                
+                //Format 12: Load address
+                
+                int SPP,Rd,Word8;
+                
+                SPP= (int)((meow>>11)&0b0000000000000001);// Source: 0 -> PC  ,  1 -> SP
+                
+                Rd= (int)((meow>>8)&0b0000000000000111); //Destination Register
+                
+                Word8=(int)(meow &0b0000000011111111); // 8-bit unsigned constant
+                
+                int Imm;
+                
+                Imm=(int)((Word8<<2)&0b0000001111111111);// changing from 8 bit to 10 bit immediate value by addig two zeros in the right of the Word8
+                
+                //step1: shift Word 8 to the left by 2
+                
+                //step2: anding the new shifted int with 1023 (ten ones at the right in the binary), to get the first 10 bits form the right after being shifted by 2
+                
+                //(Imm ready now)
+                
+                
+                
+                //The addition depend on the value of the SPP
+                
+                // if SPP=0 then, Rd=Imm+PC;
+                
+                // if SPP=1 then, Rd=Imm+SP;
+                
+                
+                
+                if(SPP==0){
+                    
+                    cout << "ADD R" << Rd << ", PC, #" << Imm ;
+                    
+                    Regs[Rd] = Memory[Imm+PC];}
+                
+                
+                
+                if(SPP==1){
+                    
+                    cout << "ADD R" << Rd << ", SP, #" << Imm ;
+                    
+                    Regs[Rd] = Memory[Imm+SP];}
+                
+                
+                
+            }
+            
+            
+            
+            if(indicator1==1)
+                
+            {
+                
+                int indicator2; // indicator2 is the bit number 10
+                
+                //I use this bit to differate between fomat 13 and format 14
+                
+                // if indicator2 (bit10) =0. then, I am in format 13.
+                
+                // if indicator2 (bit10)= 1. then, I am in format 14.
+                
+                
+                
+                indicator2=(int)((meow>>10)& 0b0000000000000001);
+                
+                //step1: shift meow right by 10
+                
+                //step2: bit wise anding with 0b0000000000000001, to get the first fit from the right after being shifted.
+                
+                
+                
+                if(indicator2==0)
+                    
+                {
+                    
+                    //Format 13: Add offset to the stack pointer
+                    
+                    //***************FORMAT 13***********************FORMAT 13*************************FORMAT 13***********
+                    
+                    
+                    
+                    int S;  // Sign flag  (S=0 -> offset is positive , S=1 ->offset is negtive)
+                    
+                    int SWord7;// 7-bit immediate value
+                    
+                    
+                    
+                    S=(int)((meow>>7) & 0b0000000000000001);
+                    
+                    SWord7=(int)(meow & 0b0000000001111111);
+                    
+                    
+                    
+                    //SWord7 is 7-bit immediate value
+                    
+                    //Step 1: I will transform those 7 bits to be 9 bits by shifting the number to the left by 2
+                    
+                    //then, take the first 9 bits from the right
+                    
+                    //Imm will be the result of this step (I mean step 1)
+                    
+                    int Imm;
+                    
+                    Imm=(int)((SWord7<<2) & 0b0000000111111111);
+                    
+                    
+                    
+                    
+                    
+                    // if S=0 -> Imm is positive
+                    
+                    // if S=1 -> Imm is negtive
+                    
+                    switch(S)
+                    
+                    {
+                            
+                        case 0:
+                            
+                        {
+                            
+                            //Imm is positive in this case.
+                            
+                            //that means that I will get the Imm as it is without changing anything on its value.
+                            
+                            cout << "ADD " << "SP" << ", #" << Imm ;
+                            
+                            SP = Memory[Imm+SP]; //add #Imm to the stack pointer
+                            
+                        }break;
+                            
+                            
+                            
+                        case 1:
+                            
+                        {
+                            
+                            //Imm is negtive in this case.
+                            
+                            //that means that I have to get its 2's complement first.
+                            
+                            //HOW??
+                            
+                            //Step1: get the 1's complement of the Imm first.
+                            
+                            Imm=(int)(~Imm);
+                            
+                            //Step2: add 1 to the Imm
+                            
+                            Imm=(int)(Imm+0b0000000000000001);
+                            
+                            //After getting the 2's complement of the Imm, I can complete normally my code.
+                            
+                            cout << "ADD " << "SP" << ", #" << Imm ;
+                            
+                            //SP=577;??????????
+                            
+                            // SP = Memory[SP+Imm]; //add #Imm after getting its 2's complement to the stack pointer
+                            
+                        }break;
+                            
+                            
+                            
+                    }//of switch
+                    
+                }//of indicator 2 (if indicator2==0)
+                
+                
+                
+                
+                
+                //start new
+                
+                
+                
+                if(indicator2==1)
+                    
+                {//Format 14:push/pop registers
+                    
+                    
+                    
+                    int Rlist; //Register List
+                    
+                    Rlist=(int)(meow & 0b0000000011111111);
+                    
+                    //###############################################################################################
+                    
+                    int count;//count number of ones in the Rlist, to know how many registers I will work with after that.
+                    
+                    count=0;
+                    
+                    int spare[8];//I open an array called spare of size 8 , because the number of bits in the Rlist is 8.
+                    
+                    //Here, I fill the array from spare[0] to spare[7] with a value in that location of the bit.
+                    
+                    // location of bit -> i.
+                    
+                    //cout<<"The content of Array spare: ";
+                    
+                    for(int i=0; i<=7; i++){
+                        
+                        spare[i]=(int)((Rlist>>i)&(0b0000000000000001));
+                        
+                        //cout<<"R"<<i<<" ="<<spare[i];
+                        
+                    }
+                    
+                    //Then, I will go through the all array, (spare array) that I just did.
+                    
+                    //if there is 1 in the location of i in the array spare, I will increment the value of count. Otherwise, i will do nothing.
+                    
+                    for(int i=0; i<=7; i++){
+                        
+                        if(spare[i]==0b0000000000000001) count++;} //???????????????
+                    
+                    //cout<<"count of 1's in the array spare: "<<count;
+                    
+                    //################################################################################################
+                    
+                    int R;// PC/LR bit (0-> do not store LR/ load PC   ,    1-> Store LR/ Load PC)
+                    
+                    R=(int)((meow>>8)&0b0000000000000001);
+                    
+                    
+                    
+                    if(R==0b0000000000000001) //means that I will gonna to store LR/ or load PC.
+                        
+                        //that means the number of registers that I will gonna deal with will be incremented by one, which
+                        
+                        //is PC or LR
+                        
+                    {count=count+1;}
+                    
+                    //cout<<"total count is: "<<count;
+                    
+                    //###############################################################################################
+                    
+                    int L; // Load/Store Bit , to know whether I will load from the memory or store in the memory
+                    
+                    //if L=0-> Store to memory.
+                    
+                    //if L=1-> Load from memory.
+                    
+                    L=(int)((meow>>11)&0b0000000000000001);
+                    
+                    //###############################################################################################
+                    
+                    int stackaddress;
+                    
+                    int copySP;
+                    
+                    
+                    
+                    if (L==0)
+                        
+                    {
+                        
+                        //#############################################START CASE 0 IN FORMAT 14:PUSH ONTO THE STACK
+                        
+                        //#############################################START CASE 0 IN FORMAT 14:PUSH ONTO THE STACK
+                        
+                        //L=0 -> store to memory (push registers)
+                        
+                        //cout<<"Format 14: Push Registers onto the stack. ";
+                        
+                        
+                        
+                        int reminder;// will have the copy of the count, which count number of 1's
+                        
+                        reminder=count;
+                        
+                        //cout<<"reminder= "<<reminder;
+                        
+                        
+                        
+                        if(R==0b0000000000000000)//push registers specified in Rlist onto the stack
+                            
+                        {
+                            
+                            //if that happen, I will push the register i onto the stack
+                            
+                            //I will get the value of the SP in sth. called stackaddress.
+                            
+                            //cout;
+                            
+                            stackaddress=SP;
+                            
+                            //cout<<"old stack address="<<SP;
+                            
+                            //I will save space in the memory
+                            
+                            //count->number of registers I wanna to load in the memory
+                            
+                            //each register contains instruction word of 16 bits (2 bytes)
+                            
+                            //for each register I will save 2 places in the memory for them
+                            
+                            stackaddress= stackaddress-(count*2);
+                            
+                            //The stack is always assumed to be full decending
+                            
+                            //for store and push, I will decrement first.
+                            
+                            //update stack pointer
+                            
+                            SP=stackaddress;
+                            
+                            //cout<<"new stack address after being modified="<<SP;
+                            
+                            //save original value of SP in storeSP
+                            
+                            copySP=stackaddress;
+                            
+                            //cout<<"format 14: PUSH {Rlist} ";
+                            
+                            //cout<<"number of registers we are gonna to deal with="<<count;
+                            
+                            if(count>0) cout<<"PUSH {";
+                            
+                            for(int i=0; i<=7; i++){
+                                
+                                if(spare[i]==0b0000000000000001){
+                                    
+                                    if(i<=6){//load/push register number i onto the stack
+                                        
+                                        Memory[copySP]= (int)(Regs[i] & 0b0000000011111111);//LEAST SIGNIFICANT 8 BITS
+                                        
+                                        //cout<<"copySP1="<<copySP;
+                                        
+                                        copySP++;
+                                        
+                                        Memory[copySP]=(int)((Regs[i]>>8) & 0b0000000011111111);//MOST SIGINIFICANT 8
+                                        
+                                        //cout<<"copySP2="<<copySP;
+                                        
+                                        copySP++;
+                                        Memory[copySP]=(int)((Regs[i]>>8) & 0b0000000011111111);
+                                        copySP++;
+                                        Memory[copySP]=(int)((Regs[i]>>8) & 0b0000000011111111);
+                                        copySP++;
+                                        
+                                        stackaddress=stackaddress+2;
+                                        
+                                        reminder=reminder-1;
+                                        
+                                        if(i<=6 && reminder>0)cout<<"R"<<i<<",";
+                                        
+                                        else cout<<"R"<<i<<"}";}
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    else{//load/push register number i onto the stack
+                                        
+                                        Memory[copySP]= (int)(Regs[i] & 0b0000000011111111);//LEAST SIGNIFICANT 8 BITS
+                                        
+                                        //cout<<"copySP1="<<copySP;
+                                        
+                                        copySP++;
+                                        
+                                        Memory[copySP]=(int)((Regs[i]>>8) & 0b0000000011111111);//MOST SIGINIFICANT 8
+                                        copySP++;
+                                        Memory[copySP]=(int)((Regs[i]>>8) & 0b0000000011111111);
+                                        copySP++;
+                                        Memory[copySP]=(int)((Regs[i]>>8) & 0b0000000011111111);
+                                        //cout<<"copySP2="<<copySP;
+                                        
+                                        cout<<"R"<<i<<"}";}
+                                    
+                                }}}//of R (if(R==0b0000000000000000))
+                        
+                        
+                        
+                        //####################ELSE OF CASE 0 IN FORMAT 14:PUSH LIST AND LR ONTO STACK##################
+                        
+                        //####################ELSE OF CASE 0 IN FORMAT 14:PUSH LIST AND LR ONTO STACK##################
+                        
+                        
+                        
+                        if(R==0b0000000000000001)
+                            
+                            // that means that R=1 -> push the link register and the registers specified in the Rlist onto the stack
+                            
+                        {
+                            
+                            //cout<<"format 14: PUSH {Rlist, LR} ";
+                            
+                            
+                            
+                            //if that happen, I will push the register i in the stack.
+                            
+                            //I will get the value of the SP in sth. called stackaddress.
+                            
+                            stackaddress=SP;
+                            
+                            //cout<<"old stack address="<<SP;
+                            
+                            //I will save space in the memory
+                            
+                            //count->number of registers I wanna to load in the memory
+                            
+                            //each register contains instruction word of 16 bits (2 bytes)
+                            
+                            //for each register I will save 2 places in the memory for them
+                            
+                            stackaddress= stackaddress-(count*2);
+                            
+                            //The stack is always assumed to be full decending
+                            
+                            //for store and push, I will decrement first.
+                            
+                            //update stack pointer
+                            
+                            SP=stackaddress;
+                            
+                            //cout<<"new stack address="<<SP;
+                            
+                            copySP=SP;
+                            
+                            
+                            
+                            if(count>0) cout<<"PUSH "<<"{";
+                            
+                            for(int i=0; i<=8; i++){
+                                
+                                if(spare[i]==0b0000000000000001){
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    if(i<=7){//load/push register number i onto the stack
+                                        
+                                        Memory[copySP]= (int)(Regs[i] & 0b0000000011111111);//LEAST SIGNIFICANT 8 BITS
+                                        
+                                        //cout<<"copy SP1="<<copySP;
+                                        
+                                        copySP=copySP+1;
+                                        
+                                        Memory[copySP]=(int)((Regs[i]>>8) & 0b0000000011111111);//MOST SIGINIFICANT 8
+                                        copySP++;
+                                        Memory[copySP]=(int)((Regs[i]>>8) & 0b0000000011111111);
+                                        copySP++;
+                                        Memory[copySP]=(int)((Regs[i]>>8) & 0b0000000011111111);
+                                        //cout<<"copy SP2="<<copySP;
+                                        
+                                        copySP=copySP+1;
+                                        
+                                        //increment stackaddress by 2
+                                        
+                                        //stackaddress=stackaddress+2;
+                                        
+                                        if(i<=7 && reminder==2) cout<<"R"<<i<<"";
+                                        
+                                        else if(i<=7 && reminder>1) cout<<"R"<<i<<",";
+                                        
+                                        reminder=reminder-1;}
+                                    
+                                    
+                                    
+                                    if(reminder==1){//load/push link register onto the stack
+                                        
+                                        Memory[copySP]= (int)(LR & 0b0000000011111111);//LEAST SIGNIFICANT 8 BITS
+                                        
+                                        //cout<<"copy SP1="<<copySP;
+                                        
+                                        copySP=copySP+1;
+                                        
+                                        Memory[copySP]=(int)((LR>>8) & 0b0000000011111111);//MOST SIGINIFICANT 8
+                                        copySP++;
+                                        Memory[copySP]=(int)((LR>>8) & 0b0000000011111111);
+                                        copySP++;
+                                      
+                                        Memory[copySP]=(int)((LR>>8) & 0b0000000011111111);
+                                        //cout<<"copy SP2="<<copySP;
+                                        
+                                        copySP=copySP+1;
+                                        
+                                        //increment stackaddress by 2
+                                        
+                                        //stackaddress=stackaddress+2;
+                                        
+                                        cout<<",LR"<<"}";}
+                                    
+                                }}}//of R (if(R==0b0000000000000001))
+                        
+                    }// of L (if (L==0))
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    if(L==1)//L=1 ->load from memory (pop registers)
+                        
+                    {   //cout<<"Format 14: Pop Registers from the stack. ";
+                        
+                        //for load and pop instructions, the stack pointer in the full descending is incremented after
+                        
+                        
+                        
+                        int reminder1;// will have the copy of the count, which count number of 1's
+                        
+                        reminder1=count;
+                        
+                        //cout<<"reminder1= "<<reminder1;
+                        
+                        
+                        
+                        if(R==0b0000000000000000){
+                            
+                            //cout<<"format 14: POP {Rlist} ";
+                            
+                            int copy1;
+                            
+                            copy1=SP;
+                            
+                            //cout<<"stack address (original)="<<SP;
+                            
+                            //pop registers specified in Rlist from the stack
+                            
+                            if(count>0) cout<<"POP "<<"{";
+                            
+                            for(int i=0; i<=7; i++){
+                                
+                                if(spare[i]==0b0000000000000001){
+                                    
+                                    //if that happen, I will pop the register i in the stack.
+                                    
+                                    //The stack is always assumed to be full decending
+                                    
+                                    //for load and pop instructions, the stack pointer in the full descending is incremented after
+                                    
+                                    if(reminder1>1){
+                                        
+                                        //pop register number i (16 bits) from the stack
+                                        
+                                        int least, most, most1, most2;
+                                        
+                                        least=(int)((Memory[copy1])& 0b0000000011111111);
+                                        
+                                        //cout<<"address1="<<copy1;
+                                        
+                                        copy1++;
+                                        
+                                        most=(int)((Memory[copy1]<<8) & 0b1111111100000000);
+                                        
+                                        //cout<<"address2="<<copy1;
+                                        
+                                        copy1++;
+                                        most1=(int)((Memory[copy1]<<8) & 0b1111111100000000);
+                                        copy1++;
+                                        most2=(int)((Memory[copy1]<<8) & 0b1111111100000000);
+                                        copy1++;
+                                        
+                                        Regs[i]= most | least | most1 | most2;
+                                        
+                                        cout<<"R"<<i<<",";
+                                        
+                                        reminder1--;
+                                        
+                                        //cout<<"reminder="<<reminder1;
+                                        
+                                    }
+                                    
+                                    
+                                    
+                                    else if(reminder1==1){
+                                        
+                                        //pop register number i (16 bits) from the stack
+                                        
+                                        int least, most;
+                                        
+                                        least=(int)((Memory[copy1])& 0b0000000011111111);
+                                        
+                                        //cout<<"address1="<<copy1;
+                                        
+                                        copy1++;
+                                        
+                                        most=(int)((Memory[copy1]<<8) & 0b1111111100000000);
+                                        
+                                        //cout<<"address2="<<copy1;
+                                        
+                                        copy1++;
+                                        
+                                        PC= most | least;
+                                        
+                                        cout<<"R"<<i<<"}";
+                                        
+                                        //reminder1--;
+                                        
+                                    }
+                                    
+                                }}
+                            
+                            
+                            
+                            //update stack pointer by incrementing it(after finishing the loop)
+                            
+                            SP=SP+(count*2);
+                            
+                            //cout;
+                            
+                            //cout<<"updated stack address="<<SP;
+                            
+                            cout;}//of R ( if(R==0b0000000000000000))
+                        
+                        
+                        
+                        //$$$$$$$$$$$$$$$$$$$CLOSE  THE POPING FROM THR STACK THE SPECFIED REGISTERS$$$$$$$$$$$$$$$$$$
+                        
+                        
+                        
+                        if(R==0b0000000000000001){
+                            
+                            //cout<<"format 14: POP {Rlist,PC} ";
+                            
+                            //for load and pop instructions, the stack pointer in the full descending is incremented after
+                            
+                            int copy ;
+                            
+                            copy=SP;
+                            
+                            //cout<<"old stack address="<<SP;
+                            
+                            //pop registers specified in Rlist and PC from the stack
+                            
+                            if(count>0) cout<<"POP "<<"{";
+                            
+                            for(int i=0; i<=8; i++){
+                                
+                                if(spare[i]==0b0000000000000001)
+                                    
+                                {
+                                    
+                                    //if that happen, I will pop the register i in the stack.
+                                    
+                                    //The stack is always assumed to be full decending
+                                    
+                                    //for load and pop instructions, the stack pointer in the full descending is incremented after
+                                    
+                                    if(reminder1>1){
+                                        
+                                        //pop register number i (16 bits) from the stack ??check plz??
+                                        
+                                        int least, most;
+                                        
+                                        least=(int)((Memory[copy])& 0b0000000011111111);
+                                        
+                                        //cout<<"F_address="<<copy;
+                                        
+                                        copy++;
+                                        
+                                        most=(int)((Memory[copy]<<8) & 0b1111111100000000);
+                                        
+                                        //cout<<"S_address="<<copy;
+                                        
+                                        copy++;
+                                        
+                                        Regs[i]= most | least;
+                                        
+                                        if(reminder1==2) cout<<"R"<<i<<"";
+                                        
+                                        else cout<<"R"<<i<<",";
+                                        
+                                        reminder1=reminder1-1;
+                                        
+                                        //cout<<"reminder="<<reminder1;
+                                        
+                                    }
+                                    
+                                    
+                                    
+                                    if(reminder1==1){
+                                        
+                                        //pop register number i (16 bits) from the stack ??check plz??
+                                        
+                                        int least, most;
+                                        
+                                        least=(int)((Memory[copy])& 0b0000000011111111);
+                                        
+                                        //cout<<"F_address="<<copy;
+                                        
+                                        copy++;
+                                        
+                                        most=(int)((Memory[copy]<<8) & 0b1111111100000000);
+                                        
+                                        //cout<<"S_address="<<copy;
+                                        
+                                        copy++;
+                                        
+                                        PC= most | least;
+                                        
+                                        cout<<",PC"<<"}";
+                                        
+                                        reminder1--;
+                                        
+                                        //cout<<"reminder="<<reminder1;
+                                        
+                                    }
+                                    
+                                }}
+                            
+                            
+                            
+                            //update stack pointer by incrementing it(after finishing the loop)
+                            
+                            SP=SP+(count*2);
+                            
+                            //cout<<"new stack address="<<SP;
+                            
+                            cout;}//of R (if(R==0b0000000000000001))
+                        
+                        //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+                        
+                    }//of L (if(L==1))
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                } // of indicator2 if(indicator2==1)
+                
+                
+                
+                //end
+                
+                
+                
+                
+                
+            }// of indicator 1 (if indicator1==1)
+            
+        }break;//of case 5
+            
+            
+            
+            
+            
+            
+            
+            
+            
+        case 6:
+            
+        {
+            
+            //cout<<"enter case 6 ";
+            
+            
+            
+            int checkformat=(int)((meow>>12)&0b0000000000000001);
+            
+            //if checkformat=0. Then, I am in format 15:Multiple load/store.
+            
+            //if checkformat=1. Then, I am between formats 16 and 17. I still need one more check to determine which format from those twos.
+            
+            switch(checkformat)
+            
+            {
+                    
+                case 0: //format 15: multiple load/store
+                    
+                {
+                    
+                    int L=(int)((meow>>11)&0b0000000000000001);//load/store bit
+                    
+                    int Rb=(int)((meow>>8)&0b0000000000000111);//Base Register
+                    
+                    int Rlist=(int)(meow&0b0000000011111111);//Register List
+                    
+                    int countM;//count number of ones in the Rlist, to know how many registers I will work with after that.
+                    
+                    countM=0;
+                    
+                    int spareM[8];//I open an array called spare of size 8 , because the number of bits in the Rlist is 8.
+                    
+                    //Here, I fill the array from spare[0] to spare[7] with a value in that location of the bit.
+                    
+                    // location of bit -> i.
+                    
+                    for(int i=0; i<=7; i++){
+                        
+                        spareM[i]=(int)((Rlist>>i)&(0b0000000000000001));}
+                    
+                    //Then, I will go through the all array, (spare array) that I just did.
+                    
+                    //if there is 1 in the location of i in the array spare, I will increment the value of count. Otherwise, i will do nothing.
+                    
+                    for(int i=0; i<=7; i++){
+                        
+                        //cout<<"R"<<i<<"= "<<spareM[i];
+                        
+                        if(spareM[i]==0b0000000000000001)
+                            
+                            countM++;} //???????????????
+                    
+                    //cout;
+                    
+                    //cout<<"number of multiple registers that I will gonna to deal with = "<<countM;
+                    
+                    
+                    
+                    int baseaddress;
+                    
+                    int copyb;
+                    
+                    
+                    
+                    if(L==0b0000000000000000)//store specified registers in Rlist in the memory
+                        
+                    {
+                        
+                        //cout;
+                        
+                        //cout<<"Format 15: multiple store to memory. ";
+                        
+                        //cout;
+                        
+                        
+                        
+                        //if that happen, I will store the register i in the memory
+                        
+                        //I will get the value in the Regs[Rb] in sth. called baseaddress.
+                        
+                        //for testing only
+                        
+                        Regs[Rb]=0b0000000000000110;
+                        
+                        baseaddress=Regs[Rb];
+                        
+                        //cout<<"base address="<<baseaddress;//for test
+                        
+                        
+                        
+                        //I will save space in the memory
+                        
+                        //count->number of registers I wanna to load/store in the memory
+                        
+                        //each register contains instruction word of 16 bits (2 bytes) ??????
+                        
+                        //for each register I will save 2 places in the memory for them
+                        
+                        baseaddress= baseaddress-(countM*2);
+                        
+                        //cout<<"new base address="<<baseaddress;//for test
+                        
+                        //cout;
+                        
+                        
+                        
+                        //The memory is always assumed to be full decending
+                        
+                        //for store and push, I will decrement first.
+                        
+                        //update Regs[Rb] containing actual base address
+                        
+                        Regs[Rb]=baseaddress;
+                        
+                        //save original value of baseaddress in copyb
+                        
+                        copyb=baseaddress;
+                        
+                        
+                        
+                        int reminder;
+                        
+                        reminder=countM;
+                        
+                        
+                        
+                        if(countM>0) cout<<"STMIA R"<<Rb<<"!, {";
+                        
+                        for(int i=0; i<=7; i++){
+                            
+                            if(spareM[i]==0b0000000000000001 ){
+                                
+                                if(reminder>1){//load/push register number i onto the memory
+                                    
+                                    Memory[copyb]= (int)(Regs[i] & 0b0000000011111111);//LEAST SIGNIFICANT 8 BITS
+                                    
+                                    //cout;
+                                    
+                                    //cout<<"address1 for one word:"<<copyb;
+                                    
+                                    copyb++;
+                                    
+                                    Memory[copyb]=(int)((Regs[i]>>8) & 0b0000000011111111);//MOST SIGINIFICANT 8 BITS????????
+                                    
+                                    //cout<<"address2 for rest of the word:"<<copyb;
+                                    
+                                    //increment baseaddress by 2 //??????? increment baseaddress by 2 or what??
+                                    
+                                    copyb++;
+                                    
+                                    cout<<"R"<<i<<",";
+                                    
+                                    //cout;
+                                    
+                                    
+                                    
+                                    reminder=reminder-1;
+                                    
+                                    //cout<<"reminder="<<reminder;
+                                    
+                                    
+                                    
+                                    
+                                    
+                                }
+                                
+                                
+                                
+                                
+                                
+                                else if(reminder==1){//load/push register number i in the memory
+                                    
+                                    Memory[copyb]= (int)(Regs[i] & 0b0000000011111111);//LEAST SIGNIFICANT 8 BITS
+                                    
+                                    //cout;
+                                    
+                                    //cout<<"address1 for one word:"<<copyb;
+                                    
+                                    copyb++;
+                                    
+                                    Memory[copyb]=(int)((Regs[i]>>8) & 0b0000000011111111);//MOST SIGINIFICANT 8
+                                    
+                                    //cout<<"address2 for the rest of the word:"<<copyb;
+                                    
+                                    copyb++;
+                                    
+                                    cout<<"R"<<i<<"}";
+                                    
+                                    //cout;
+                                    
+                                    //reminder=reminder-1;
+                                    
+                                }}}}
+                    
+                    
+                    
+                    else{
+                        
+                        int remaining;
+                        
+                        remaining=countM;
+                        
+                        
+                        
+                        //cout<<"Format 15: multiple load from memory. ";
+                        
+                        int copying ;
+                        
+                        
+                        
+                        copying=Regs[Rb];
+                        
+                        
+                        
+                        //cout;
+                        
+                        //cout<<"old base address= "<<copying;
+                        
+                        //cout;
+                        
+                        
+                        
+                        //load from memory to REGISTERS SPECIFIED IN RLIST
+                        
+                        
+                        
+                        
+                        
+                        if(countM>0) cout<<"LDMIA R"<<Regs[Rb]<<"!,{";
+                        
+                        for(int i=0; i<=7; i++){
+                            
+                            if(spareM[i]==0b0000000000000001){
+                                
+                                //if that happen, I will load from memory to register i
+                                
+                                //The memory is always assumed to be full decending
+                                
+                                //for load , the base address (Regs[Rb]) is incremented after
+                                
+                                
+                                
+                                if(remaining>1){
+                                    
+                                    //load from memory to register number i (16 bits)
+                                    
+                                    int least, most;
+                                    
+                                    least=(int)((Memory[copying])& 0b0000000011111111);
+                                    
+                                    copying++;
+                                    
+                                    most=(int)((Memory[copying]<<8) & 0b1111111100000000);
+                                    
+                                    Regs[i]= most | least;
+                                    
+                                    copying++;
+                                    
+                                    
+                                    
+                                    cout<<"R"<<i<<",";
+                                    
+                                    
+                                    
+                                    //cout;
+                                    
+                                    //cout<<"address after loading = "<<copying;
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    remaining--;
+                                    
+                                    //cout<<"remaining="<<remaining;
+                                    
+                                    
+                                    
+                                    
+                                    
+                                }
+                                
+                                
+                                
+                                else if(remaining==1){
+                                    
+                                    //load from memory to register number i (16 bits) ??check plz??
+                                    
+                                    int least, most;
+                                    
+                                    least=(int)((Memory[copying])& 0b0000000011111111);
+                                    
+                                    copying++;
+                                    
+                                    most=(int)((Memory[copying]<<8) & 0b1111111100000000);
+                                    
+                                    Regs[i]= most | least;
+                                    
+                                    copying=copying+1;
+                                    
+                                    
+                                    
+                                    cout<<"R"<<i<<"}";
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    //cout<<"address after loading = "<<copying;
+                                    
+                                }}}
+                        
+                        
+                        
+                        //update base address in the Regs[Rb] by incrementing it(after finishing the loop)
+                        
+                        Regs[Rb]=Regs[Rb]+(countM*2);
+                        
+                        
+                        
+                        //cout<<"new base address= "<<Regs[Rb];
+                        
+                    }
+                    
+                }break;//break of inner case (case 0:)
+                    
+                    
+                    
+                    
+                    
+                case 1:// format 16 and 17. Need one more check to determine which one of those two formats.
+                    
+                {
+                    
+                    int differ;//used to differnate between format 16 and format 17
+                    
+                    differ=(int)((meow>>8)&0b0000000000001111);
+                    
+                    //cout<<"differ= "<<differ;
+                    
+                    
+                    
+                    
+                    
+                    if(differ==0b0000000000001111)//format 17:software interrupt
+                        
+                    {
+                        
+                        
+                        
+                        int Value8;//comment field
+                        
+                        Value8=(int)(meow & 0b0000000011111111);
+                        
+                        //cout<<"Value8= "<<Value8;
+                        
+                        
+                        
+                        cout<<"SWI "<<Value8<<" ";
+                        
+                        
+                        
+                        
+                        
+                        if(Value8==1) //print  the integer in r0
+                            
+                        {
+                            
+                            cout<<"Regs[0] = "<<Regs[0];
+                            
+                        }
+                        
+                        
+                        
+                    }
+                    
+                    
+                    
+                    else //format 16: conditional branch
+                        
+                    {
+                        
+                        int SOffset8=(int)(meow & 0b0000000011111111);// 8-bit signed immediate
+                        
+                        
+                        
+                        switch(differ)
+                        
+                        {
+                                
+                            case 0://BEQ label
+                                
+                            {
+                                
+                                //cout<<"Condition 0000";
+                                
+                                //cout;
+                                
+                                if(Z==1)
+                                    
+                                {
+                                    
+                                    //go to label
+                                    
+                                    int label;
+                                    
+                                    label=(int)(SOffset8<<1);
+                                    
+                                    
+                                    
+                                    //cout<<"SOffset8="<<SOffset8;
+                                    
+                                    //cout<<"label="<<label;
+                                    
+                                    
+                                    
+                                    //cout<<"old PC= "<<PC;
+                                    
+                                    //update program counter
+                                    
+                                    PC=PC+2;
+                                    
+                                    //cout<<"new PC= "<<PC;
+                                    
+                                    
+                                    
+                                    if (PC % 4 == 0)
+                                        
+                                        //we can branch to the address so:
+                                        
+                                        PC = label;
+                                    
+                                    
+                                    
+                                    cout<<"BEQ label";
+                                    
+                                    
+                                    
+                                }
+                                
+                            }
+                                
+                                break;
+                                
+                                
+                                
+                                
+                                
+                            case 1://BNE label
+                                
+                            {
+                                
+                                //cout<<"Condition 0001";
+                                
+                                //cout;
+                                
+                                
+                                
+                                if(Z==0)
+                                    
+                                {
+                                    
+                                    //go to label
+                                    
+                                    int label;
+                                    
+                                    label=(int)(SOffset8<<1);
+                                    
+                                    
+                                    
+                                    //cout<<"SOffset8="<<SOffset8;
+                                    
+                                    //cout<<"label="<<label;
+                                    
+                                    
+                                    
+                                    //cout<<"old PC= "<<PC;
+                                    
+                                    //update program counter
+                                    
+                                    PC=PC+2;
+                                    
+                                    //cout<<"new PC= "<<PC;
+                                    
+                                    
+                                    
+                                    if (PC % 4 == 0)
+                                        
+                                        //we can branch to the address so:
+                                        
+                                        PC = label;
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    cout<<"BNE label";
+                                    
+                                    
+                                    
+                                }
+                                
+                            }
+                                
+                                break;
+                                
+                                
+                                
+                                
+                                
+                            case 2://BCS label
+                                
+                            {
+                                
+                                //cout<<"Condition 0010";
+                                
+                                //cout;
+                                
+                                
+                                
+                                if(C==1)
+                                    
+                                {
+                                    
+                                    //go to label
+                                    
+                                    int label;
+                                    
+                                    label=(int)(SOffset8<<1);
+                                    
+                                    
+                                    
+                                    //cout<<"SOffset8="<<SOffset8;
+                                    
+                                    //cout<<"label="<<label;
+                                    
+                                    
+                                    
+                                    //cout<<"old PC= "<<PC;
+                                    
+                                    //update program counter
+                                    
+                                    PC=PC+2;
+                                    
+                                    //cout<<"new PC= "<<PC;
+                                    
+                                    
+                                    
+                                    if (PC % 4 == 0)
+                                        
+                                        //we can branch to the address so:
+                                        
+                                        PC = label;
+                                    
+                                    
+                                    
+                                    cout<<"BCS label";
+                                    
+                                    
+                                    
+                                }
+                                
+                            }
+                                
+                                break;
+                                
+                                
+                                
+                                
+                                
+                            case 3://BCC label
+                                
+                            {
+                                
+                                //cout<<"Condition 0011";
+                                
+                                //cout;
+                                
+                                
+                                
+                                if(C==0)
+                                    
+                                {
+                                    
+                                    //go to label
+                                    
+                                    int label;
+                                    
+                                    label=(int)(SOffset8<<1);
+                                    
+                                    
+                                    
+                                    //cout<<"SOffset8="<<SOffset8;
+                                    
+                                    //cout<<"label="<<label;
+                                    
+                                    
+                                    
+                                    //cout<<"old PC= "<<PC;
+                                    
+                                    //update program counter
+                                    
+                                    PC=PC+4;
+                                    
+                                    //cout<<"new PC= "<<PC;
+                                    
+                                    
+                                    
+                                    if (PC % 4 == 0)
+                                        
+                                        //we can branch to the address so:
+                                        
+                                        PC = label;
+                                    
+                                    
+                                    
+                                    cout<<"BCC label";
+                                    
+                                    
+                                    
+                                }
+                                
+                            }
+                                
+                                break;
+                                
+                                
+                                
+                                
+                                
+                            case 4://BMI label
+                                
+                            {
+                                
+                                //cout<<"Condition 0100";
+                                
+                                //cout;
+                                
+                                
+                                
+                                if(N==1)
+                                    
+                                {
+                                    
+                                    //go to label
+                                    
+                                    int label;
+                                    
+                                    label=(int)(SOffset8<<1);
+                                    
+                                    
+                                    
+                                    //cout<<"SOffset8="<<SOffset8;
+                                    
+                                    //cout<<"label="<<label;
+                                    
+                                    
+                                    
+                                    //cout<<"old PC= "<<PC;
+                                    
+                                    //update program counter
+                                    
+                                    PC=PC+2;
+                                    
+                                    //cout<<"new PC= "<<PC;
+                                    
+                                    
+                                    
+                                    if (PC % 4 == 0)
+                                        
+                                        //we can branch to the address so:
+                                        
+                                        PC = label;
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    cout<<"BMI label";
+                                    
+                                    
+                                    
+                                }
+                                
+                            }
+                                
+                                break;
+                                
+                                
+                                
+                                
+                                
+                            case 5://BPL label
+                                
+                            {
+                                
+                                //cout<<"Condition 0101";
+                                
+                                //cout;
+                                
+                                
+                                
+                                if(N==0)
+                                    
+                                {
+                                    
+                                    //go to label
+                                    
+                                    int label;
+                                    
+                                    label=(int)(SOffset8<<1);
+                                    
+                                    
+                                    
+                                    //cout<<"SOffset8="<<SOffset8;
+                                    
+                                    //cout<<"label="<<label;
+                                    
+                                    
+                                    
+                                    //cout<<"old PC= "<<PC;
+                                    
+                                    //update program counter
+                                    
+                                    PC=PC+2;
+                                    
+                                    //cout<<"new PC= "<<PC;
+                                    
+                                    
+                                    
+                                    if (PC % 4 == 0)
+                                        
+                                        //we can branch to the address so:
+                                        
+                                        PC = label;
+                                    
+                                    
+                                    
+                                    cout<<"BPL label";
+                                    
+                                    
+                                    
+                                }
+                                
+                            }
+                                
+                                break;
+                                
+                                
+                                
+                                
+                                
+                            case 6://BVS label
+                                
+                            {
+                                
+                                //cout<<"Condition 0110";
+                                
+                                //cout;
+                                
+                                
+                                
+                                if(V==1)
+                                    
+                                {
+                                    
+                                    //go to label
+                                    
+                                    int label;
+                                    
+                                    label=(int)(SOffset8<<1);
+                                    
+                                    
+                                    
+                                    //cout<<"SOffset8="<<SOffset8;
+                                    
+                                    //cout<<"label="<<label;
+                                    
+                                    
+                                    
+                                    //cout<<"old PC= "<<PC;
+                                    
+                                    //update program counter
+                                    
+                                    PC=PC+2;
+                                    
+                                    //cout<<"new PC= "<<PC;
+                                    
+                                    
+                                    
+                                    if (PC % 4 == 0)
+                                        
+                                        //we can branch to the address so:
+                                        
+                                        PC = label;
+                                    
+                                    
+                                    
+                                    cout<<"BVS label";
+                                    
+                                }
+                                
+                            }
+                                
+                                break;
+                                
+                                
+                                
+                                
+                                
+                            case 7://BVC label
+                                
+                            {
+                                
+                                //cout<<"Condition 0111";
+                                
+                                //cout;
+                                
+                                
+                                
+                                if(V==0)
+                                    
+                                {
+                                    
+                                    //go to label
+                                    
+                                    int label;
+                                    
+                                    label=(int)(SOffset8<<1);
+                                    
+                                    
+                                    
+                                    //cout<<"SOffset8="<<SOffset8;
+                                    
+                                    //cout<<"label="<<label;
+                                    
+                                    
+                                    
+                                    //cout<<"old PC= "<<PC;
+                                    
+                                    //update program counter
+                                    
+                                    PC=PC+2;
+                                    
+                                    //cout<<"new PC= "<<PC;
+                                    
+                                    
+                                    
+                                    if (PC % 4 == 0)
+                                        
+                                        //we can branch to the address so:
+                                        
+                                        PC = label;
+                                    
+                                    
+                                    
+                                    cout<<"BVC label";
+                                    
+                                }
+                                
+                            }
+                                
+                                break;
+                                
+                                
+                                
+                                
+                                
+                            case 8://BHI label
+                                
+                            {
+                                
+                                //cout<<"Condition 1000";
+                                
+                                //cout;
+                                
+                                
+                                
+                                if( (C==1) && (Z==0) )
+                                    
+                                {
+                                    
+                                    //go to label
+                                    
+                                    int label;
+                                    
+                                    label=(int)(SOffset8<<1);
+                                    
+                                    
+                                    
+                                    //cout<<"SOffset8="<<SOffset8;
+                                    
+                                    //cout<<"label="<<label;
+                                    
+                                    
+                                    
+                                    //cout<<"old PC= "<<PC;
+                                    
+                                    //update program counter
+                                    
+                                    PC=PC+2;
+                                    
+                                    //cout<<"new PC= "<<PC;
+                                    
+                                    
+                                    
+                                    if (PC % 4 == 0)
+                                        
+                                        //we can branch to the address so:
+                                        
+                                        PC = label;
+                                    
+                                    
+                                    
+                                    cout<<"BHI label";
+                                    
+                                    
+                                    
+                                }
+                                
+                            }
+                                
+                                break;
+                                
+                                
+                                
+                                
+                                
+                            case 9://BLS label
+                                
+                            {
+                                
+                                //cout<<"Condition 1001";
+                                
+                                //cout;
+                                
+                                
+                                
+                                if( (C==0) || (Z==1) )
+                                    
+                                {
+                                    
+                                    //go to label
+                                    
+                                    int label;
+                                    
+                                    label=(int)(SOffset8<<1);
+                                    
+                                    
+                                    
+                                    //cout<<"SOffset8="<<SOffset8;
+                                    
+                                    //cout<<"label="<<label;
+                                    
+                                    
+                                    
+                                    //cout<<"old PC= "<<PC;
+                                    
+                                    //update program counter
+                                    
+                                    PC=PC+2;
+                                    
+                                    //cout<<"new PC= "<<PC;
+                                    
+                                    
+                                    
+                                    if (PC % 4 == 0)
+                                        
+                                        //we can branch to the address so:
+                                        
+                                        PC = label;
+                                    
+                                    
+                                    
+                                    cout<<"BLS label";
+                                    
+                                    
+                                    
+                                }
+                                
+                            }
+                                
+                                break;
+                                
+                                
+                                
+                                
+                                
+                            case 10://BGE label
+                                
+                            {
+                                
+                                //cout<<"Condition 1010";
+                                
+                                //cout;
+                                
+                                
+                                
+                                if( (N==1 && V==1) || (N==0 && V==0) )
+                                    
+                                {
+                                    
+                                    //go to label
+                                    
+                                    int label;
+                                    
+                                    label=(int)(SOffset8<<1);
+                                    
+                                    
+                                    
+                                    //cout<<"SOffset8="<<SOffset8;
+                                    
+                                    //cout<<"label="<<label;
+                                    
+                                    
+                                    
+                                    //cout<<"old PC= "<<PC;
+                                    
+                                    //update program counter
+                                    
+                                    PC=PC+2;
+                                    
+                                    //cout<<"new PC= "<<PC;
+                                    
+                                    
+                                    
+                                    if (PC % 4 == 0)
+                                        
+                                        //we can branch to the address so:
+                                        
+                                        PC = label;
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    cout<<"BGE label";
+                                    
+                                }
+                                
+                            }
+                                
+                                break;
+                                
+                                
+                                
+                                
+                                
+                            case 11://BLT label
+                                
+                            {
+                                
+                                //cout<<"Condition 1011";
+                                
+                                //cout;
+                                
+                                
+                                
+                                if( (N==1 && V==0) || (N==0 && V==1) )
+                                    
+                                {
+                                    
+                                    //go to label
+                                    
+                                    int label;
+                                    
+                                    label=(int)(SOffset8<<1);
+                                    
+                                    
+                                    
+                                    //cout<<"SOffset8="<<SOffset8;
+                                    
+                                    //cout<<"label="<<label;
+                                    
+                                    
+                                    
+                                    //cout<<"old PC= "<<PC;
+                                    
+                                    //update program counter
+                                    
+                                    PC=PC+2;
+                                    
+                                    //cout<<"new PC= "<<PC;
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    if (PC % 4 == 0)
+                                        
+                                        //we can branch to the address so:
+                                        
+                                        PC = label;
+                                    
+                                    
+                                    
+                                    cout<<"BLT label";
+                                    
+                                }
+                                
+                            }
+                                
+                                break;
+                                
+                                
+                                
+                                
+                                
+                            case 12://BGT label //??? CHECK CONDITION
+                                
+                            {
+                                
+                                //cout<<"Condition 1100";
+                                
+                                //cout;
+                                
+                                
+                                
+                                if((Z==0 && N==1 && V==1)  || (Z==0 && N==0 && V==0))
+                                    
+                                {
+                                    
+                                    //go to label
+                                    
+                                    int label;
+                                    
+                                    label=(int)(SOffset8<<1);
+                                    
+                                    
+                                    
+                                    //cout<<"SOffset8="<<SOffset8;
+                                    
+                                    //cout<<"label="<<label;
+                                    
+                                    
+                                    
+                                    //cout<<"old PC= "<<PC;
+                                    
+                                    //update program counter
+                                    
+                                    PC=PC+2;
+                                    
+                                    //cout<<"new PC= "<<PC;
+                                    
+                                    
+                                    
+                                    
+                                    
+                                    if (PC % 4 == 0)
+                                        
+                                        //we can branch to the address so:
+                                        
+                                        PC = label;
+                                    
+                                    
+                                    
+                                    cout<<"BGT label";
+                                    
+                                }
+                                
+                            }
+                                
+                                break;
+                                
+                                
+                                
+                                
+                                
+                            case 13://BLE label
+                                
+                            {
+                                
+                                //cout<<"Condition 1101";
+                                
+                                //cout;
+                                
+                                
+                                
+                                if( (Z==1) || (N==1 && V==0) || (N==0 && V==1) )
+                                    
+                                {
+                                    
+                                    //go to label
+                                    
+                                    int label;
+                                    
+                                    label=(int)(SOffset8<<1);
+                                    
+                                    
+                                    
+                                    //cout<<"SOffset8="<<SOffset8;
+                                    
+                                    //cout<<"label="<<label;
+                                    
+                                    
+                                    
+                                    //cout<<"old PC= "<<PC;
+                                    
+                                    //update program counter
+                                    
+                                    PC=PC+2;
+                                    
+                                    //cout<<"new PC= "<<PC;
+                                    
+                                    
+                                    
+                                    if (PC % 4 == 0)
+                                        
+                                        //we can branch to the address so:
+                                        
+                                        PC = label;
+                                    
+                                    
+                                    
+                                    cout<<"BLE label";
+                                    
+                                    
+                                    
+                                }
+                                
+                            }
+                                
+                                break;
+                                
+                                
+                                
+                                
+                                
+                        }//of small small switch
+                        
+                    }// of else
+                    
+                    
+                    
+                }break;//break of inner case (case 1:)
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+                    
+            }//of inner switch in case 6
+            
+            
+            
+            
+            
+        }break;//break of case 6
+            
+    
             
             
             
@@ -514,523 +2581,35 @@ void simulate (unsigned short meow)
             Rb = meow >> 3 & 0b0000000000000111;
             switch (meow >> 11 & 0b0000000000000011){ //Switching on BL
                 case 0:
-                    cout << "STR R" << Rd << ", [R" << Rb << ", #" << imm_b_zero << "]"<< endl;
+                { cout << "STR R" << Rd << ", [R" << Rb << ", #" << imm_b_zero << "]";
+                    Memory[Regs[Rb] + imm_b_zero] = Regs[Rd] & 0b1111111100000000;
+                    Memory[Regs[Rb] + imm_b_zero + 1] = Regs[Rd]<<8 & 0b1111111100000000;
+                    Memory[Regs[Rb] + imm_b_zero + 2] = Regs[Rd] <<24& 0b1111111100000000;
+                    Memory[Regs[Rb] + imm_b_zero + 3] = Regs[Rd] & 0b1111111100000000;
+                }
                     break;
                 case 1:
-                    cout << "LDR R" << Rd << ", [R" << Rb << ", #" << imm_b_zero << "]"<< endl;
+                { cout << "LDR R" << Rd << ", [R" << Rb << ", #" << imm_b_zero << "]";
+                 Regs[Rd] = Memory[Regs[Rb] + imm_b_zero] + Memory[Regs[Rb] + imm_b_zero+1] + Memory[Regs[Rb] + imm_b_zero+2]+Memory[Regs[Rb] + imm_b_zero+3];
+                
+                }
                     break;
                 case 2:
-                    cout << "STRB R" << Rd << ", [R" << Rb << ", #" << imm << "]"<< endl;
+                {cout << "STRB R" << Rd << ", [R" << Rb << ", #" << imm << "]";
+                Memory[Regs[Rb] + imm_b_zero]  = Regs[Rd] & 0b1111111100000000;
+                }
                     break;
                 case 3:
-                    cout << "LDRB R" << Rd << ", [R" << Rb << ", #" << imm << "]"<< endl;
+                { cout << "LDRB R" << Rd << ", [R" << Rb << ", #" << imm << "]";
+                    Regs[Rd] = Memory[Regs[Rb] + imm_b_zero];
+                }
                     break;
                     
             }
             break;
             
         }
-            ////////////////AYA'S PART/////////////////////////AYA'S PART /////////////////////////AYA'S PART//////////////////////////////
-            ///////////HAS A PROBLEM//////////////////////////HAS A PROBLEM ///////////////////////////HAS A PROBLEM///////////////////////
-            ////////REGISTER LIST////////////////////REGISTER LIST/////////////////////REGISTER LIST///////////////////////////////////////
-            /////////////////DO NOT SET CONDITIONS CODES //////////////////////////////DO NOT SET CONDITIONS CODES/////////////////////////
-            ///////////////AYA'S PART///////////////////AYA'S PART/////////////////////////////AYA'S PART///////////AYA'S PART/////////////
-            /////////////////////////////CASE 5//////////////////////////CASE 5/////////////////////////////CASE 5/////////////////////////
-            
-        case 5:
-            //bit12: used as an indicator 1 for me to indicate in which case I am in
-            // to get indicator1: step1: shift meow 12 to the right. step2: anding it with one to get the first bit from the left.
-            int indicator1= (int)((meow>>12)&0b0000000000000001);
-            
-            switch (indicator1)
-        {
-                //********************FORMAT 12*********************FORMAT 12**********************FORMAT 12***********************
-            case 0://Format 12: Load address
-            {
-                int SPP;
-                int Rd;
-                int Word8;
-                
-                SPP= (int)((meow>>11)&0b0000000000000001);// Source: 0 -> PC  ,  1 -> SP
-                Rd= (int)((meow>>8)&0b0000000000000111); //Destination Register
-                Word8=(int)(meow &0b0000000011111111); // 8-bit unsigned constant
-                
-                int Imm;
-                
-                Imm=(int)((Word8<<2)&0b0000001111111111);// changing from 8 bit to 10 bit immediate value by addig two zeros in the right of the Word8
-                //step1: shift Word 8 to the left by 2
-                //step2: anding the new shifted int with 1023 (ten ones at the right in the binary), to get the first 10 bits form the right after being shifted by 2
-                
-                
-                //(Imm ready now)
-                
-                
-                //The addition depend on the value of the SPP
-                // if SPP=0 then, Rd=Imm+PC;
-                // if SPP=1 then, Rd=Imm+SP;
-                
-                switch(SPP)
-                {
-                    case 0:
-                    {
-                        cout << "ADD R" << Rd << ", [PC, #" << Imm << "]" << endl;
-                        Regs[Rd] = Memory[Imm+PC];
-                        
-                    }
-                        break;
-                        
-                    case 1:
-                    {
-                        cout << "ADD " << Rd << ", [SP, #" << Imm << "]" << endl;
-                        //Regs[Rd] = Memory[Imm+SP];
-                    }
-                        break;
-                }
-                
-                
-                
-            }
-                break;
-                //end of Format 12
-                //*********************END OF FORMAT 12****************END OF FORMAT 12****************************************
-                //*********************END OF FORMAT 12****************END OF FORMAT 12****************************************
-                //*********************END OF FORMAT 12****************END OF FORMAT 12****************************************
-                
-                
-                
-                
-                //*****************FORMAT 13 AND 14****************FORMAT 13 AND 14*******************FORMAT 13 AND 14*************
-            case 1:
-            {
-                int indicator2; // indicator2 is the bit number 10
-                //I use this bit to differate between fomat 13 and format 14
-                // if indicator2 (bit10) =0. then, I am in format 13.
-                // if indicator2 (bit10)= 1. then, I am in format 14.
-                
-                indicator2=(int)((meow>>10)& 0b0000000000000001);
-                //step1: shift meow right by 10
-                //step2: bit wise anding with 0b0000000000000001, to get the first fit from the right after being shifted.
-                
-                switch(indicator2)
-                {
-                    case 0:
-                    {
-                        
-                        //Format 13: Add offset to the stack pointer
-                        //***************FORMAT 13***********************FORMAT 13*************************FORMAT 13***********
-                        
-                        int S;  // Sign flag  (S=0 -> offset is positive , S=1 ->offset is negtive)
-                        int SWord7;// 7-bit immediate value
-                        
-                        S=(int)((meow>>7) & 0b0000000000000001);
-                        SWord7=(int)(meow & 0b0000000001111111);
-                        
-                        //SWord7 is 7-bit immediate value
-                        //Step 1: I will transform those 7 bits to be 9 bits by shifting the number to the left by 2
-                        //then, take the first 9 bits from the right
-                        //Imm will be the result of this step (I mean step 1)
-                        int Imm;
-                        Imm=(int)((SWord7<<2) & 0b0000000111111111);
-                        
-                        
-                        // if S=0 -> Imm is positive
-                        // if S=1 -> Imm is negtive
-                        switch(S)
-                        {
-                            case 0:
-                            {
-                                //Imm is positive in this case.
-                                //that means that I will get the Imm as it is without changing anything on its value.
-                                
-                                cout << "ADD " << "SP" << ", #" << Imm <<endl;
-                                SP = Memory[Imm+SP]; //add #Imm to the stack pointer
-                                
-                            }
-                                break;
-                                
-                            case 1:
-                            {
-                                //Imm is negtive in this case.
-                                //that means that I have to get its 2's complement first.
-                                //HOW??
-                                //Step1: get the 1's complement of the Imm first.
-                                Imm=(int)(~Imm);
-                                //Step2: add 1 to the Imm
-                                Imm=(int)(Imm+0b0000000000000001);
-                                
-                                //After getting the 2's complement of the Imm, I can complete normally my code.
-                                cout << "ADD " << "SP" << ", #" << Imm <<endl;
-                                //SP=577;??????????
-                                // SP = Memory[SP+Imm]; //add #Imm after getting its 2's complement to the stack pointer
-                            }
-                                break;
-                                
-                        }
-                        
-                        
-                    }
-                        break;
-                        //end of Format 13
-                        //*********************END OF FORMAT 13****************END OF FORMAT 13**************************************
-                        
-                        
-                        
-                    case 1:
-                    {
-                        //Format 14:push/pop registers
-                        //***************FORMAT 14***********************FORMAT 14*************************FORMAT 14***********
-                        
-                        int Rlist; //Register List
-                        Rlist=(int)(meow & 0b0000000011111111);
-                        
-                        
-                        //###############################################################################################
-                        int count;//count number of ones in the Rlist, to know how many registers I will work with after that.
-                        count=0;
-                        
-                        int spare[8];//I open an array called spare of size 8 , because the number of bits in the Rlist is 8.
-                        //Here, I fill the array from spare[0] to spare[7] with a value in that location of the bit.
-                        // location of bit -> i.
-                        for(int i=0; i<=7; i++){
-                            spare[i]=(int)((Rlist>>i)&(0b0000000000000001));
-                            //cout<<spare[i]<<" ";
-                        }
-                        
-                        
-                        //Then, I will go through the all array, (spare array) that I just did.
-                        //if there is 1 in the location of i in the array spare, I will increment the value of count. Otherwise, i will do nothing.
-                        for(int i=0; i<=7; i++){
-                            if(spare[i]==0b0000000000000001) count++;} //???????????????
-                        
-                        
-                        //################################################################################################
-                        
-                        int R;// PC/LR bit (0-> do not store LR/ load PC   ,    1-> Store LR/ Load PC)
-                        R=(int)((meow>>8)&0b0000000000000001);
-                        
-                        if(R==0b0000000000000001) //means that I will gonna to store LR/ or load PC.
-                            //that means the number of registers that I will gonna deal with will be incremented by one, which
-                            //is PC or LR
-                        {
-                            count=count+1;
-                        }
-                        
-                        //###############################################################################################
-                        
-                        int L; // Load/Store Bit , to know whether I will load from the memory or store in the memory
-                        //if L=0-> Store to memory.
-                        //if L=1-> Load from memory.
-                        L=(int)((meow>>11)&0b0000000000000001);
-                        
-                        //###############################################################################################
-                        int stackaddress;
-                        int copySP;
-                        
-                        switch(L) //??????????????????stack
-                        //??????????? I do not save workspace at the start of the subroutine and I do not return address
-                        //??????????? Are those two important?
-                        {
-                                //#############################################START CASE 0 IN FORMAT 14:PUSH ONTO THE STACK
-                                //#############################################START CASE 0 IN FORMAT 14:PUSH ONTO THE STACK
-                            case 0: //L=0 -> store to memory (push registers)
-                            {
-                                if(R==0b0000000000000000)//push registers specified in Rlist onto the stack
-                                {if(count>0) cout<<"PUSH "<<"{";
-                                    for(int i=0; i<=7; i++){
-                                        if(spare[i]==0b0000000000000001){
-                                            //if that happen, I will push the register i onto the stack
-                                            //??????????
-                                            //I will get the value of the SP in sth. called stackaddress.
-                                            stackaddress=SP;
-                                            //I will save space in the memory
-                                            //count->number of registers I wanna to load in the memory
-                                            //each register contains instruction word of 16 bits (2 bytes) ??????
-                                            //for each register I will save 2 places in the memory for them
-                                            stackaddress= stackaddress-(count*2);
-                                            //????????????? how i will fill the stack from top to bottom or from bottom to top ot it does not matter?
-                                            //The stack is always assumed to be full decending
-                                            //for store and push, I will decrement first.
-                                            //update stack pointer
-                                            SP=stackaddress;
-                                            //save original value of SP in storeSP
-                                            copySP=stackaddress;
-                                            
-                                            if(i<=6){//load/push register number i onto the stack
-                                                Memory[copySP]= (int)(Regs[i] & 0b0000000011111111);//LEAST SIGNIFICANT 8 BITS
-                                                Memory[copySP+1]=(int)((Regs[i]>>8) & 0b0000000011111111);//MOST SIGINIFICANT 8 BITS????????
-                                                //increment stackaddress by 2 //??????? increment stack pointer by 2 or what??
-                                                stackaddress=stackaddress+2;
-                                                cout<<"R"<< i <<",";}
-                                            
-                                            
-                                            else{//load/push register number i onto the stack
-                                                Memory[copySP]= (int)(Regs[i] & 0b0000000011111111);//LEAST SIGNIFICANT 8 BITS
-                                                Memory[copySP+1]=(int)((Regs[i]>>8) & 0b0000000011111111);//MOST SIGINIFICANT 8
-                                                //increment stackaddress by 2 //??????? increment stack pointer by 2 or what??
-                                                stackaddress=stackaddress+2;
-                                                cout<<"R"<<i<<"}"<<endl;}}}}
-                                
-                                //####################ELSE OF CASE 0 IN FORMAT 14:PUSH LIST AND LR ONTO STACK##################
-                                //####################ELSE OF CASE 0 IN FORMAT 14:PUSH LIST AND LR ONTO STACK##################
-                                
-                                else
-                                    // that means that R=1 -> push the link register and the registers specified in the Rlist onto the stack
-                                {
-                                    if(count>0) cout<<"PUSH "<<"{";
-                                    //??????? Is the order of puhing things matters or not?
-                                    //??????? I mean have I push the link register first or it doesnot matter ????
-                                    
-                                    for(int i=0; i<=7; i++){
-                                        if(spare[i]==0b0000000000000001){
-                                            //if that happen, I will push the register i in the stack.
-                                            
-                                            //push register number i in the stack.
-                                            
-                                            //??????????
-                                            //I will get the value of the SP in sth. called stackaddress.
-                                            stackaddress=SP;
-                                            
-                                            //I will save space in the memory
-                                            //count->number of registers I wanna to load in the memory
-                                            //each register contains instruction word of 16 bits (2 bytes) ??????
-                                            //for each register I will save 2 places in the memory for them
-                                            stackaddress= stackaddress-(count*2);
-                                            
-                                            //????????????? how i will fill the stack from top to bottom or from bottom to top ot it does not matter?
-                                            //The stack is always assumed to be full decending
-                                            //for store and push, I will decrement first.
-                                            
-                                            //update stack pointer
-                                            SP=stackaddress;
-                                            copySP=SP;
-                                            
-                                            if(i<=6){//load/push register number i onto the stack
-                                                Memory[copySP]= (int)(Regs[i] & 0b0000000011111111);//LEAST SIGNIFICANT 8 BITS
-                                                Memory[copySP+1]=(int)((Regs[i]>>8) & 0b0000000011111111);//MOST SIGINIFICANT 8
-                                                copySP=copySP+1;
-                                                //increment stackaddress by 2 //??????? increment stack pointer by 2 or what??
-                                                stackaddress=stackaddress+2;
-                                                cout<<"R"<<i<<",";}
-                                            
-                                            if(i==7){//load/push link register onto the stack
-                                                Memory[copySP]= (int)(LR & 0b0000000011111111);//LEAST SIGNIFICANT 8 BITS
-                                                Memory[copySP+1]=(int)((LR>>8) & 0b0000000011111111);//MOST SIGINIFICANT 8
-                                                copySP=copySP+1;
-                                                //increment stackaddress by 2 //??????? increment stack pointer by 2 or what??
-                                                stackaddress=stackaddress+2;
-                                                cout<<",LR "<<"}"<<endl;}
-                                        }}}
-                                
-                            }break;
-                                
-                                //#############################################START CASE 1 IN FORMAT 14:POP FROM THE STACK
-                                //#############################################START CASE 1 IN FORMAT 14:POP FROM THE STACK
-                            case 1://L=1 ->load from memory (pop registers)
-                            {
-                                //for load and pop instructions, the stack pointer in the full descending is incremented after
-                                
-                                
-                                if(R==0b0000000000000000){
-                                    int copy1,copy2 ;
-                                    copy1=SP; //least
-                                    copy2=SP+1; //most
-                                    //POP REGISTERS SPECIFIED IN RLIST FROM THE STACK
-                                    //pop registers specified in Rlist from the stack
-                                    if(count>0) cout<<"POP "<<"{";
-                                    for(int i=0; i<=7; i++){
-                                        if(spare[i]==0b0000000000000001){
-                                            //if that happen, I will pop the register i in the stack.
-                                            //pop register number i from the stack.
-                                            //????????????? how i will fill the stack from top to bottom or from bottom to top ot it does not matter?
-                                            //The stack is always assumed to be full decending
-                                            //for load and pop instructions, the stack pointer in the full descending is incremented after
-                                            
-                                            if(i<=6){
-                                                //pop register number i (16 bits) from the stack ??check plz??
-                                                int least, most;
-                                                least=(int)((Memory[copy1])& 0b0000000011111111);
-                                                most=(int)((Memory[copy2]<<8) & 0b1111111100000000);
-                                                Regs[i]= most | least;
-                                                copy1=copy1+2;
-                                                copy2=copy2+2;
-                                                cout<<"R"<<i<<",";}
-                                            
-                                            if(i==7){
-                                                //pop register number i (16 bits) from the stack ??check plz??
-                                                int least, most;
-                                                least=(int)((Memory[copy1])& 0b0000000011111111);
-                                                most=(int)((Memory[copy2]<<8) & 0b1111111100000000);
-                                                PC= most | least;
-                                                copy1=copy1+2;
-                                                copy2=copy2+2;
-                                                cout<<"R"<<i<<"}";}}}
-                                    
-                                    //update stack pointer by incrementing it(after finishing the loop)
-                                    SP=SP+(count*2);}
-                                
-                                //$$$$$$$$$$$$$$$$$$$CLOSE  THE POPING FROM THR STACK THE SPECFIED REGISTERS$$$$$$$$$$$$$$$$$$
-                                
-                                else{
-                                    //for load and pop instructions, the stack pointer in the full descending is incremented after
-                                    int copy1,copy2 ;
-                                    copy1=SP; //least
-                                    copy2=SP+1; //most
-                                    
-                                    //pop registers specified in Rlist and PC from the stack
-                                    if(count>0) cout<<"POP "<<"{";
-                                    
-                                    for(int i=0; i<=7; i++){
-                                        if(spare[i]==0b0000000000000001)
-                                        {
-                                            //if that happen, I will pop the register i in the stack.
-                                            //pop register number i from the stack.
-                                            //????????????? how i will fill the stack from top to bottom or from bottom to top ot it does not matter?
-                                            //The stack is always assumed to be full decending
-                                            //for load and pop instructions, the stack pointer in the full descending is incremented afterctions, the stack pointer in the full descending is incremented after
-                                            
-                                            if(i<=6){
-                                                //pop register number i (16 bits) from the stack ??check plz??
-                                                int least, most;
-                                                least=(int)((Memory[copy1])& 0b0000000011111111);
-                                                most=(int)((Memory[copy2]<<8) & 0b1111111100000000);
-                                                Regs[i]= most | least;
-                                                copy1=copy1+2;
-                                                copy2=copy2+2;
-                                                cout<<"R"<<i<<",";}
-                                            
-                                            if(i==7){
-                                                //pop register number i (16 bits) from the stack ??check plz??
-                                                int least, most;
-                                                least=(int)((Memory[copy1])& 0b0000000011111111);
-                                                most=(int)((Memory[copy2]<<8) & 0b1111111100000000);
-                                                PC= most | least;
-                                                copy1=copy1+2;
-                                                copy2=copy2+2;
-                                                cout<<",PC"<<"}"<<endl;}}}
-                                    
-                                    //update stack pointer by incrementing it(after finishing the loop)
-                                    SP=SP+(count*2);}
-                                //$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
-                            }
-                                break;
-                                
-                        }
-                        
-                    }break;
-                }}break;
-                
-                
-                
-                ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-                ///////Start The Second Part of My Part Whose hi=6//////////////Start The Second Part of My Part Whose hi=6////////////////////
-                ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-            case 6:
-            {
-                int checkformat=(int)((meow>>12)&0b0000000000000001);
-                //if checkformat=0. Then, I am in format 15:Multiple load/store.
-                //if checkformat=1. Then, I am between formats 16 and 17. I still need one more check to determine which format from those twos.
-                switch(checkformat)
-                {
-                    case 0: //format 15: multiplt load/store
-                    {
-                        int L=(int)((meow>>11)&0b0000000000000001);//load/store bit
-                        int Rb=(int)((meow>>8)&0b0000000000000111);//Base Register ?????only 3 bits
-                        int Rlist=(int)(meow&0b0000000011111111);//Register List
-                        int countM;//count number of ones in the Rlist, to know how many registers I will work with after that.
-                        countM=0;
-                        int spareM[8];//I open an array called spare of size 8 , because the number of bits in the Rlist is 8.
-                        //Here, I fill the array from spare[0] to spare[7] with a value in that location of the bit.
-                        // location of bit -> i.
-                        for(int i=0; i<=7; i++){
-                            spareM[i]=(int)((Rlist>>i)&(0b0000000000000001));}
-                        //Then, I will go through the all array, (spare array) that I just did.
-                        //if there is 1 in the location of i in the array spare, I will increment the value of count. Otherwise, i will do nothing.
-                        for(int i=0; i<=7; i++){ if(spareM[i]==0b0000000000000001) countM++;} //???????????????
-                        
-                        int baseaddress;
-                        int copyb;
-                        
-                        if(L==0b0000000000000000)//store specified registers in Rlist in the memory
-                        {if(countM>0) cout<<"STMIA R"<<Rb<<"!, { ";
-                            for(int i=0; i<=7; i++){
-                                if(spareM[i]==0b0000000000000001){
-                                    //if that happen, I will store the register i in the memory
-                                    //??????????
-                                    //I will get the value in the Regs[Rb] in sth. called baseaddress.
-                                    baseaddress=Regs[Rb];
-                                    //I will save space in the memory
-                                    //count->number of registers I wanna to load/store in the memory
-                                    //each register contains instruction word of 16 bits (2 bytes) ??????
-                                    //for each register I will save 2 places in the memory for them
-                                    baseaddress= baseaddress-(countM*2);
-                                    //????????????? how i will fill the memory from top to bottom or from bottom to top ot it does not matter?
-                                    //The memory is always assumed to be full decending
-                                    //for store and push, I will decrement first.
-                                    //update Regs[Rb] containing actual base address
-                                    Regs[Rb]=baseaddress;
-                                    //save original value of baseaddress in copyb
-                                    copyb=baseaddress;
-                                    
-                                    if(i<=6){//load/push register number i onto the stack
-                                        Memory[copyb]= (int)(Regs[i] & 0b0000000011111111);//LEAST SIGNIFICANT 8 BITS
-                                        Memory[copyb+1]=(int)((Regs[i]>>8) & 0b0000000011111111);//MOST SIGINIFICANT 8 BITS????????
-                                        //increment baseaddress by 2 //??????? increment baseaddress by 2 or what??
-                                        baseaddress=baseaddress+2;
-                                        cout<<"R"<<i<<",";}
-                                    
-                                    
-                                    if(i==7){//load/push register number i in the memory
-                                        Memory[copyb]= (int)(Regs[i] & 0b0000000011111111);//LEAST SIGNIFICANT 8 BITS
-                                        Memory[copyb+1]=(int)((Regs[i]>>8) & 0b0000000011111111);//MOST SIGINIFICANT 8
-                                        //increment baseaddress by 2 //??????? increment baseaddress by 2 or what??
-                                        baseaddress=baseaddress+2;
-                                        cout<<"R"<<i<<"}"<<endl;}}}}
-                        
-                        else{int copy1,copy2 ;
-                            copy1=Regs[Rb]; //least
-                            copy2=Regs[Rb]+1; //most
-                            //load from memory to REGISTERS SPECIFIED IN RLIST
-                            if(countM>0) cout<<"LDMIA R"<<Regs[Rb]<<"!,{ ";
-                            for(int i=0; i<=7; i++){
-                                if(spareM[i]==0b0000000000000001){
-                                    //if that happen, I will load from memory to register i
-                                    //The memory is always assumed to be full decending
-                                    //for load , the base address (Regs[Rb]) is incremented after
-                                    
-                                    if(i<=6){
-                                        //load from memory to register number i (16 bits)  ??check plz??
-                                        int least, most;
-                                        least=(int)((Memory[copy1])& 0b0000000011111111);
-                                        most=(int)((Memory[copy2]<<8) & 0b1111111100000000);
-                                        Regs[i]= most | least;
-                                        copy1=copy1+2;
-                                        copy2=copy2+2;
-                                        cout<<"R"<<i<<",";}
-                                    
-                                    if(i==7){
-                                        //load from memory to register number i (16 bits) ??check plz??
-                                        int least, most;
-                                        least=(int)((Memory[copy1])& 0b0000000011111111);
-                                        most=(int)((Memory[copy2]<<8) & 0b1111111100000000);
-                                        PC= most | least;
-                                        copy1=copy1+2;
-                                        copy2=copy2+2;
-                                        cout<<"R"<<i<<"}";}}}
-                            
-                            //update base address in the Regs[Rb] by incrementing it(after finishing the loop)
-                            Regs[Rb]=Regs[Rb]+(countM*2);}
-                    }break;
-                        
-                        
-                        //%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-                    case 1:// format 16 and 17. Need one more check to determine which one of those two formats.
-                    {
-                        
-                    }break;
-                }
-            }
-                break;
-                //////////////////END OF PART 2 OF MINE///////////////////END OF PART 2 OF MINE/////////////////END OF PART 2 OF MINE//////////
+           
         case 4:
         {
             if (!((meow >> 12) & 0x0001))  // Format 10
@@ -1073,28 +2652,41 @@ void simulate (unsigned short meow)
             }
         }
             break;
+       
+    
         case 7:
         {
             bool op = static_cast<bool>((meow >> 12) & 0x0001);
             bool h = static_cast<bool>((meow >> 11) & 0x0001);
             int offset = static_cast<int>((meow & 0x07FF));
-            if (op) // Format 18
+            if (!op) // Format 18
             {
-                Regs[15] += (offset - 4) << 1;
+                printf("B %#08x", ((offset) << 1));
+                PC += (offset) << 1;
             }
             else    // Format 19
             {
-                if (h)  // High offset
+                if (!h)  // Low offset
                 {
+                    //printf("BL %#08x", (PC + (offset << 12)));
+                    LR = (PC + (offset << 12) + 4);
+                    // LR = { 12 bits of offset + 20 bits of PC }
                     
                 }
-                else    // Low offset
+                else    // High offset
                 {
+                    unsigned int temp = PC; // Next Instruction
+                    printf("BL %#08x", (offset << 1) + LR);
                     
+                    // PC = ((offset) << 1) + LR; // LR = { 20 bits of PC + 12 bits of offset }
+                    LR = temp | 1;
                 }
             }
         }
             break;
-    }
     
-    }}
+    
+    
+    }
+            
+    }
